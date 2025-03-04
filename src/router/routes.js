@@ -1,0 +1,254 @@
+import DashboardLayout from "@/layout/dashboard/DashboardLayout.vue";
+import LoginLayout from "@/layout/dashboard/LoginLayout.vue";
+// GeneralViews
+import NotFound from "@/pages/NotFoundPage.vue";
+
+// Admin pages
+import Dashboard from "@/pages/Dashboard.vue";
+import UserProfile from "@/pages/UserProfile.vue";
+import Notifications from "@/pages/Notifications.vue";
+import Icons from "@/pages/Icons.vue";
+import Maps from "@/pages/Maps.vue";
+import Typography from "@/pages/Typography.vue";
+import Clients from "@/pages/Clients.vue";
+import Transaction from "@/pages/Transaction.vue";
+import Reports from "@/pages/Report.vue";
+import Services from "@/pages/Service.vue";
+import ServicesCat from "@/pages/ServiceCat.vue";
+import ScheduleAvailability from "@/pages/ScheduleAvailability.vue";
+
+
+import Appointments from "@/pages/Appointment.vue";
+import Transactions from "@/pages/Transactions.vue";
+import Dtr from "@/pages/Dtr.vue";
+import DtrManager from "@/pages/DtrManager.vue";
+import DtrView from "@/pages/DtrView.vue";
+import Expenses from "@/pages/Expenses.vue";
+import Users from "@/pages/User.vue";
+import UserPermission from "@/pages/UserPermission.vue";
+import Settings from "@/pages/Settings.vue";
+
+import UpdateBusiness from "@/layout/dashboard/UpdateBusiness.vue";
+
+
+import AppointmentLayout from "@/layout/dashboard/AppointmentLayout.vue";
+import RegisterLayout from "@/layout/dashboard/RegisterLayout.vue";
+import ForgotLayout from "@/layout/dashboard/ForgotLayout.vue";
+import ResetLayout from "@/layout/dashboard/ResetLayout.vue";
+import TodaysAppointment from "@/layout/dashboard/TodaysAppointment.vue";
+import ConfirmAppointment from "@/layout/dashboard/ConfirmAppointment.vue";
+
+
+
+const routes = [
+  {
+    path: "/",
+    component: DashboardLayout,
+    redirect: "/dashboard",
+    children: [
+      {
+        path: "dashboard",
+        name: "dashboard",
+        component: Dashboard,
+        meta: {
+          requiresAuth: true 
+        }
+      },
+      {
+        path: "clients",
+        name: "clients",
+        component: Clients,
+        meta: {
+          requiresAuth: true 
+        }
+      },
+      {
+        path: "transaction/:id",
+        name: "transaction",
+        component: Transaction,
+        meta: {
+          requiresAuth: true 
+        }
+      },
+      {
+        path: "appointments",
+        name: "appointments",
+        component: Appointments,
+        meta: {
+          requiresAuth: true 
+        }
+      },
+      {
+        path: "reports",
+        name: "reports",
+        component: Reports,
+        meta: {
+          requiresAuth: true,
+          requiresAdmin: true  
+        }
+      },
+      {
+        path: "services",
+        name: "services",
+        component: Services,
+        meta: {
+          requiresAuth: true,
+          requiresAdmin: true  
+        }
+      },
+      {
+        path: "services-cat",
+        name: "services Category",
+        component: ServicesCat,
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        path: "availability",
+        name: "schedule availability",
+        component: ScheduleAvailability,
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
+        path: "users",
+        name: "users",
+        component: Users,
+        meta: {
+          requiresAuth: true 
+        }
+      },
+      {
+        path: "profile",
+        name: "profile",
+        component: UserProfile,
+        meta: {
+          requiresAuth: true 
+        }
+      },
+      {
+        path: "user-permission",
+        name: "User Permission",
+        component: UserPermission,
+        meta: {
+          requiresAuth: true 
+        }
+      },
+      {
+        path: "transactions",
+        name: "transactions",
+        component: Transactions,
+        meta: {
+          requiresAuth: true 
+        }
+      },{
+        path: "dtr",
+        name: "dtr",
+        component: Dtr,
+        meta: {
+          requiresAuth: true 
+        }
+      },{
+        path: "dtr-manager",
+        name: "dtr manager",
+        component: DtrManager,
+        meta: {
+          requiresAuth: true,
+          requiresAdmin: true   
+        }
+      },{
+        path: "/dtr/:id",
+        name: "dtr view",
+        component: DtrView,
+        meta: {
+          requiresAuth: true,
+          requiresAdmin: true   
+        }
+      },{
+        path: "settings",
+        name: "settings",
+        component: Settings,
+        meta: {
+          requiresAuth: true,
+          requiresAdmin: true   
+        }
+      }
+      
+      
+      ,{
+        path: "expenses",
+        name: "expenses",
+        component: Expenses,
+        meta: {
+          requiresAuth: true,
+          requiresAdmin: true   
+        }
+      },{
+        path: '/admin/appointments/confirm/:id',
+        name: "Confirm Appointment",
+        component: ConfirmAppointment,
+        meta: {
+          requiresAuth: true,
+          requiresAdmin: true   
+        }
+      }
+      
+    ],
+  },
+  {
+    path: "/login",
+    component: LoginLayout,
+    name: "login",
+
+  },
+  {
+    path: "/book/:id",
+    component: AppointmentLayout,
+    name: "appointment",
+    props: true, // optional, allows passing the route param as a prop
+  },  
+  {
+    path: "/register",
+    component: RegisterLayout,
+    name: "Register",
+
+  },
+  {
+    path: "/forget",
+    component: ForgotLayout,
+    name: "Forgot Password",
+
+  },
+  {
+    path: '/password/reset/:token',
+    name: 'ResetPassword',
+    component: ResetLayout,
+  },
+  {
+    path: "/books",
+    component: TodaysAppointment,
+    name: "todaysappointment",
+
+  }
+  ,{
+    path: "/update-business",
+    name: "update business",
+    component: UpdateBusiness,
+  },
+  { path: "*", name: "not-found", component: NotFound },
+];
+
+
+
+/**
+ * Asynchronously load view (Webpack Lazy loading compatible)
+ * The specified component must be inside the Views folder
+ * @param  {string} name  the filename (basename) of the view to load.
+function view(name) {
+   var res= require('../components/Dashboard/Views/' + name + '.vue');
+   return res;
+};**/
+
+export default routes;

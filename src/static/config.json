@@ -1,0 +1,6 @@
+{
+    "API_URL": "http://appointme-api.test/api",
+    "DEV_URL": "https://api.appointme.tech/api",
+    "IMG_URL": "http://appointme-api.test"
+    
+}
