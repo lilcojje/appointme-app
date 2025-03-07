@@ -137,7 +137,7 @@
                         :min="minDate"
                       />
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" v-if="time_type=='auto'">
                       <label class="control-label">Select Time</label>
                       <select
                         v-model="info.time"
@@ -153,6 +153,10 @@
                           {{ item }}
                         </option>
                       </select>
+                    </div>
+                    <div class="form-group front-timepicker" v-else>
+                      <label class="control-label">Input Time</label>
+                      <vue-timepicker format="hh:mm a" v-model="info.time" id="input-time" input-class="input_time" input-width="100%" @change="inputTime" :disabled="!dateChanged"></vue-timepicker>
                     </div>
                     <div class="form-group">
                       <label class="control-label">Services</label>
@@ -241,12 +245,15 @@ import Loader from "@/components/Loader";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 import Swal from 'sweetalert2';
+import VueTimepicker from 'vue2-timepicker'
+import 'vue2-timepicker/dist/VueTimepicker.css'
 
 export default {
   components: {
     Loader,
     Multiselect,
-    Swal
+    Swal,
+    VueTimepicker
   },
   data() {
     return {
@@ -300,7 +307,8 @@ export default {
       appointment_token : '',
       // New property to store business profile data including the logo
       businessProfile: {},
-      minDate: this.getTodayDate()
+      minDate: this.getTodayDate(),
+      time_type: ''
     };
   },
   computed: {
@@ -324,7 +332,7 @@ export default {
           this.businessProfile = response.data;
           const timeTypeSetting = this.businessProfile.setting.find(item => item.key === 'time_type');
           const timeTypeValue = timeTypeSetting ? timeTypeSetting.value : null;
-          
+          this.time_type = timeTypeValue;
         })
         .catch(error => {
           console.error("Error fetching business profile:", error);
@@ -675,9 +683,10 @@ export default {
 
         let date = this.info.date;
         let time = this.info.time;
+        let time_type = this.time_type;
 
         return axios
-          .get(api.API_URL + `/check-slot?business_id=${this.$route.params.id}&date=${date}&time=${time}`, {
+          .get(api.API_URL + `/check-slot?business_id=${this.$route.params.id}&date=${date}&time=${time}&time_type=${time_type}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
           })
           .then(({ data }) => {
@@ -711,7 +720,7 @@ export default {
                 });
 
                 self.time_list = [];
-                self.dateChanged = false;
+                //self.dateChanged = false;
 
                 if (response.data.error.code === "token_could_not_verified") {
                   this.$router.push("/login");
@@ -885,6 +894,11 @@ export default {
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const dd = String(today.getDate()).padStart(2, '0');
       return `${yyyy}-${mm}-${dd}`;
+    },
+    inputTime(eventData){
+      if(eventData.displayTime.length==8){
+        this.changeTime();
+      }
     }
 
   },
@@ -1035,6 +1049,8 @@ export default {
   text-align: center;
   padding: 20px;
 }
+
+.input_time{padding:20px;}
 
 .business-title{text-align: center; margin-bottom: 60px;}
 

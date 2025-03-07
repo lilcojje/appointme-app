@@ -20,7 +20,7 @@ export default new Vuex.Store({
     setUser(state, user) {
       state.user = user;
       // Extract permission names from the user's permissions
-      state.permissions = user.permissions;
+      state.permissions = user.permissions || [];
 
     },
     setSettings(state, settings) {

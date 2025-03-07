@@ -67,9 +67,7 @@
               v-model="settings.time_zone"
               :options="timeZones"
               :custom-label="timeZonesLabel"
-              :loading="isLoadingClients"
               placeholder="Search timezone"
-              @search-change="fetchClients"
               track-by="id"
               label="first_name"
             ></multiselect>
@@ -88,9 +86,9 @@
       <transition name="fade">
         <div v-if="updateSuccess" class="success">
           Business profile updated successfully!<br/>
-          Click below to return to the dashboard.
+          Click below to return to the login.
           <br/>
-          <button @click="redirectToDashboard" class="dashboard-button">Go to Dashboard</button>
+          <button @click="redirectToDashboard" class="dashboard-button">Go to Login</button>
         </div>
       </transition>
   </div>
@@ -200,6 +198,7 @@ import api from "@/static/config.json";
 import axios from 'axios';
 import Loader from "@/components/Loader";
 import Multiselect from "vue-multiselect";
+import store from '@/store';
 
 export default {
   components: {
@@ -257,11 +256,12 @@ export default {
           time_zone: this.settings.time_zone
       })
       .then(response => {
-        localStorage.setItem("business_id", response.data.business.id);
-        localStorage.setItem("business_name", response.data.business.business_name);
+       // localStorage.setItem("business_id", response.data.business.id);
+        //localStorage.setItem("business_name", response.data.business.business_name);
 
-        this.$store.commit('updateUserBusinessName', response.data.business.business_name);
-
+        //this.$store.commit('updateUserBusinessName', response.data.business.business_name);
+        console.log(response.data.user)
+        store.commit('setUser', response.data.user); 
 
         this.loader = false;
         this.updateSuccess = true;
@@ -299,7 +299,7 @@ export default {
       });
     },
     redirectToDashboard() {
-      this.$router.push('/dashboard');
+      this.$router.push('/login');
     },
     redirectToLogin(){
       this.$router.push('/login');
@@ -310,8 +310,8 @@ export default {
   },
   created() {
 
-    if(this.user.business_name){
-      this.$router.push('/dashboard');
+    if(this.user.business_id){
+      this.$router.push('/login');
     }
     
     this.fetchTimeZones();

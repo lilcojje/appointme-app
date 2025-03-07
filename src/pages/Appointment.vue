@@ -149,15 +149,28 @@
         <input type="date" v-model="info.date" @change="changeDate" placeholder="Enter Date" :min="minDate" class="form-control" />
       </div>
 
-      <div class="form-group">
-        <label class="control-label">Select Time</label>
-        <select v-model="info.time" class="time-list form-control" :disabled="!dateChanged">
-          <option value="">Select Time</option>
-          <option v-for="(item, index) in time_list" :value="item" :key="index">
-            {{ item }}
-          </option>
-        </select>
-      </div>
+
+      <div class="form-group" v-if="timeType=='auto'">
+                      <label class="control-label">Select Time</label>
+                      <select
+                        v-model="info.time"
+                        class="time-list form-control"
+                        :disabled="!dateChanged" @change="changeTime"
+                      >
+                        <option value="">Select Time</option>
+                        <option
+                          v-for="(item, index) in time_list"
+                          :value="item"
+                          :key="index"
+                        >
+                          {{ item }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group front-timepicker" v-else>
+                      <label class="control-label">Input Time</label>
+                      <vue-timepicker format="hh:mm a" v-model="info.time" id="input-time" input-class="input_time" input-width="100%" @change="inputTime" :disabled="!dateChanged"></vue-timepicker>
+                    </div>
 
       <div class="form-group">
         <label class="control-label">Services</label>
@@ -248,6 +261,8 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 import Swal from 'sweetalert2';
+import VueTimepicker from 'vue2-timepicker'
+import 'vue2-timepicker/dist/VueTimepicker.css'
 
 export default {
   components: {
@@ -260,7 +275,8 @@ export default {
     ItemTemplate,
     Multiselect,
     FullCalendar,
-    Swal
+    Swal,
+    VueTimepicker
   },
   data() {
     return {
@@ -334,7 +350,8 @@ export default {
       minDate: this.getTodayDate(),
       schedule_found: false,
       is_not_found_error: false,
-      isDateChanged:false
+      isDateChanged:false,
+      time_type: ''
     };
   },
   computed: {
@@ -343,6 +360,20 @@ export default {
     },
     token() {
       return this.$store.state.token;
+    },
+    settings() {
+      // Ensure it's an array
+      return this.$store.state.settings;
+    },
+    timeType() {
+      const plainSettings = JSON.parse(JSON.stringify(this.settings));
+
+      const time_type = plainSettings.time_type;
+
+      return time_type;
+      // const setting = plainSettings.find(item => item.key === 'enable_booking');
+      // // Convert the value "1" to boolean true, otherwise return false
+      // return setting ? setting.value == "1" : false;
     }
   },
   methods: {
@@ -1088,6 +1119,74 @@ export default {
     },
     search() {
       this.list();
+    },
+    changeTime(){
+        let self = this;
+        this.loader_save = true;
+
+        let date = this.info.date;
+        let time = this.info.time;
+        let time_type = this.time_type;
+
+        return axios
+          .get(api.API_URL + `/check-slot?business_id=${this.user.business_id}&date=${date}&time=${time}&time_type=${time_type}`, {
+            headers: { Authorization: `Bearer ${this.token}` }
+          })
+          .then(({ data }) => {
+            self.loader_save = false;
+            console.log(data.message);
+
+            // Display SweetAlert2 success message when slot is available
+            Swal.fire({
+              icon: 'success',
+              title: data.message,
+              text: `Available Slots: ${data.available_slots}`,
+              confirmButtonText: 'OK'
+            });
+            
+            return data;
+          })
+          .catch(({ response }) => {
+              self.loader_save = false;
+              let errorMessage = "An unknown error occurred";
+
+              if (response && response.data) {
+                errorMessage = response.data.error || errorMessage;
+                console.error(errorMessage);
+
+                // Display SweetAlert2 error message
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: errorMessage,
+                  confirmButtonText: 'OK'
+                });
+
+                self.time_list = [];
+                //self.dateChanged = false;
+
+                if (response.data.error.code === "token_could_not_verified") {
+                  this.$router.push("/login");
+                }
+              } else {
+                errorMessage = "Unknown error occurred.";
+                console.error(errorMessage);
+
+                // Display SweetAlert2 error message
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: errorMessage,
+                  confirmButtonText: 'OK'
+                });
+              }
+              return Promise.reject(response);
+            });
+    },
+    inputTime(eventData){
+      if(eventData.displayTime.length==8){
+        this.changeTime();
+      }
     }
   },
   created() {
@@ -1095,6 +1194,10 @@ export default {
     this.client_name = localStorage.getItem("client_name");
     this.info.client_id = this.$route.params.id;
     this.fetchServiceOptions();
+
+    // const timeTypeSetting = this.businessProfile.setting.find(item => item.key === 'time_type');
+    //       const timeTypeValue = timeTypeSetting ? timeTypeSetting.value : null;
+    //       this.time_type = timeTypeValue;
   },
   watch: {
     selectedClient(newClient) {
