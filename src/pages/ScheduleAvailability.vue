@@ -46,10 +46,10 @@
                     <td style="width: 5%; text-align: center;">{{ schedule.slot_duration }} mins</td>
                     <td style="width: 5%; text-align: center;">{{ schedule.is_available ? 'Yes' : 'No' }}</td>
                     <td class="action">
-                      <p-button type="info" round @click.native.prevent="modalEditSchedule(schedule)">
+                      <p-button type="info" round @click.native.prevent="modalEditSchedule(schedule)" v-show="user.permissions.includes('edit_availability')">
                         <span class="ti-pencil"></span>
                       </p-button>
-                      <p-button type="info" round @click.native.prevent="deleteSchedule(schedule.id)">
+                      <p-button type="info" round @click.native.prevent="deleteSchedule(schedule.id)" v-show="user.permissions.includes('delete_availability')">
                         <span class="ti-trash"></span>
                       </p-button>
                     </td>
@@ -230,7 +230,7 @@ export default {
         slot_duration: 30,
         is_available: true,
         service_provider_id: null,
-        business_id: localStorage.getItem("business_id")
+        business_id: ''
       },
       dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
       search_value: "",
@@ -248,9 +248,16 @@ export default {
         type: "holiday",
         holiday_name: "",
         reason: "",
-        business_id: localStorage.getItem("business_id")
+        business_id: ''
       }
     };
+  },computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
   },
   methods: {
     // Business Hours Methods
@@ -260,8 +267,8 @@ export default {
       const search_val = this.search_value;
       try {
         const { data } = await axios.get(
-          `${api.API_URL}/schedule-availability?page=${page}&limit=${limit}&search=${search_val}&business_id=${localStorage.getItem("business_id")}`,
-          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+          `${api.API_URL}/schedule-availability?page=${page}&limit=${limit}&search=${search_val}&business_id=${this.user.business_id}`,
+          { headers: { Authorization: `Bearer ${this.token}` } }
         );
         this.schedules = data;
         this.total_page = Math.ceil(data.total / limit);
@@ -312,7 +319,7 @@ export default {
       this.loader_save = true;
       axios
         .post(`${api.API_URL}/schedule-availability`, this.info, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${this.token}` }
         })
         .then(() => {
           this.loader_save = false;
@@ -332,10 +339,10 @@ export default {
     updateSchedule() {
       if (!this.validateScheduleInfo()) return;
       this.loader_save = true;
-      this.info.business_id = localStorage.getItem("business_id");
+      this.info.business_id = this.user.business_id;
       axios
         .put(`${api.API_URL}/schedule-availability/${this.info.id}`, this.info, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${this.token}` }
         })
         .then(() => {
           this.loader_save = false;
@@ -375,7 +382,7 @@ export default {
           this.loader_save = true;
           axios
             .delete(`${api.API_URL}/schedule-availability/${id}`, {
-              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+              headers: { Authorization: `Bearer ${this.token}` }
             })
             .then(() => {
               this.loader_save = false;
@@ -402,7 +409,7 @@ export default {
         slot_duration: 30,
         is_available: true,
         service_provider_id: null,
-        business_id: localStorage.getItem("business_id")
+        business_id: this.user.business_id
       };
       this.openModalSchedule();
     },
@@ -427,8 +434,8 @@ export default {
       const limit = 10;
       try {
         const { data } = await axios.get(
-          `${api.API_URL}/blocked-dates?page=${page}&limit=${limit}&business_id=${localStorage.getItem("business_id")}`,
-          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+          `${api.API_URL}/blocked-dates?page=${page}&limit=${limit}&business_id=${this.user.business_id}`,
+          { headers: { Authorization: `Bearer ${this.token}` } }
         );
         this.blockedDates = data;
         this.totalPageBlocked = Math.ceil(data.total / limit);
@@ -446,7 +453,7 @@ export default {
       this.loaderBlockedSave = true;
       axios
         .post(`${api.API_URL}/blocked-dates`, this.blockedInfo, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${this.token}` }
         })
         .then(() => {
           this.loaderBlockedSave = false;
@@ -469,10 +476,10 @@ export default {
         return;
       }
       this.loaderBlockedSave = true;
-      this.blockedInfo.business_id = localStorage.getItem("business_id");
+      this.blockedInfo.business_id = this.user.business_id;
       axios
         .put(`${api.API_URL}/blocked-dates/${this.blockedInfo.id}`, this.blockedInfo, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${this.token}` }
         })
         .then(() => {
           this.loaderBlockedSave = false;
@@ -500,7 +507,7 @@ export default {
         type: "holiday",
         holiday_name: "",
         reason: "",
-        business_id: localStorage.getItem("business_id")
+        business_id: this.user.business_id
       };
       this.modalBlockedVisible = true;
     },
@@ -527,7 +534,7 @@ export default {
           this.loaderBlockedSave = true;
           axios
             .delete(`${api.API_URL}/blocked-dates/${id}`, {
-              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+              headers: { Authorization: `Bearer ${this.token}` }
             })
             .then(() => {
               this.loaderBlockedSave = false;
@@ -546,6 +553,8 @@ export default {
   created() {
     this.list();
     this.listBlockedDates();
+    this.info.business_id = this.user.business_id;
+    this.blockedInfo.business_id = this.user.business_id;
   }
 };
 </script>

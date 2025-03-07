@@ -12,7 +12,7 @@
                  otherwise, the default image is shown -->
             <img :src="businessLogo" alt="Business Logo" />
           </div>
-          {{ business_name }}
+          {{ user.business_name }}
         </a>
       </div>
       <slot> </slot>
@@ -91,8 +91,8 @@ export default {
     // Returns the correct logo based on the fetched business profile.
     businessLogo() {
       // Check if businessProfile exists and has a non-empty business_logo value.
-      if (this.businessProfile && this.businessProfile.business_logo) {
-        return api.IMG_URL + this.businessProfile.business_logo;
+      if (this.user.business_logo) {
+        return api.IMG_URL + this.user.business_logo;
       }
       // Fallback to default image.
       return require('@/assets/img/logo.png');
@@ -101,6 +101,12 @@ export default {
     arrowMovePx() {
       return this.linkHeight * this.activeLinkIndex;
     },
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
   },
   data() {
     return {
@@ -131,25 +137,6 @@ export default {
       if (index > -1) {
         this.links.splice(index, 1);
       }
-    },
-    // Fetch business details using the business_id from localStorage.
-    fetchBusinessProfile() {
-      const token = localStorage.getItem("token");
-      const business_id = localStorage.getItem("business_id");
-      axios
-        .get(api.API_URL + `/business-profile/${business_id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(response => {
-          this.businessProfile = response.data;
-          // Update the business name if it's returned in the profile.
-          if (this.businessProfile.business_name) {
-            this.business_name = this.businessProfile.business_name;
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching business profile:", error);
-        });
     }
   },
   mounted() {
@@ -157,9 +144,9 @@ export default {
       immediate: true,
     });
     // Optionally initialize business_name from localStorage.
-    this.business_name = localStorage.getItem('business_name') || '';
+    this.business_name = this.user.business_name || '';
     // Fetch updated business details.
-    this.fetchBusinessProfile();
+    
   },
 };
 </script>

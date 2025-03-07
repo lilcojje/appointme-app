@@ -1,5 +1,6 @@
 <template>
   <div id="settings">
+    <loader v-if="loader_save" />
     <!-- Tabs Navigation -->
     <div class="tabs">
       <button 
@@ -24,13 +25,13 @@
       </p>
       <div class="form-group">
         <label>
-          <input type="checkbox" v-model="settings.enable_booking" />
+          <input type="checkbox" v-model="settings.enable_booking"  @change="enable_book_btn($event.target.checked)"/>
           Enable Booking Online Form
         </label>
         <p class="item-description">
           Enable or disable the online booking form to allow customers to schedule appointments directly through your website.
         </p>
-        <div v-if="settings.enable_booking" class="booking-link-container">
+        <div v-if="enable_booking_btn" class="booking-link-container">
           <p class="booking-link">Booking Link: 
             <a :href="bookingUrl" target="_blank">{{ bookingUrl }}</a>
           </p>
@@ -41,18 +42,42 @@
         <label>Number of Slot Per Time:</label>
         <input type="text" v-model="settings.number_of_slots" />
         <p class="item-description">
-          Choose your local time zone to ensure correct scheduling for bookings and time-based functionalities.
+          Enter the maximum number of appointments allowed per time slot.
         </p>
       </div>
+      <div class="form-group">
+        <label>Slot Durations:</label>
+        <input type="text" v-model="settings.slot_duration" placeholder="Mins."/>
+        <p class="item-description">
+          Specify the duration (in minutes) for each time slot interval.
+        </p>
+      </div>
+      <div class="form-group">
+        <label>Time Input Type:</label>
+        <div>
+          <label>
+            <input type="radio" v-model="settings.time_type" value="auto">
+            Auto Generate
+          </label>
+        </div>
+        <div>
+          <label>
+            <input type="radio" v-model="settings.time_type" value="manual">
+            Manual
+          </label>
+        </div>
+        <p class="item-description">
+          Choose time input: Manual or Auto-generated based on the Slot Durations.
+        </p>
+      </div>
+
       <div class="form-group">
         <label>Time Zone:</label>
         <multiselect
           v-model="settings.time_zone"
           :options="timeZones"
           :custom-label="timeZonesLabel"
-          :loading="isLoadingClients"
           placeholder="Search timezone"
-          @search-change="fetchClients"
           track-by="id"
           label="first_name"
         ></multiselect>
@@ -101,9 +126,11 @@
 import axios from "axios";
 import api from "@/static/config.json";
 import Multiselect from "vue-multiselect";
+import Loader from "@/components/Loader";
 export default {
   components: {
-    Multiselect
+    Multiselect,
+    Loader
   },
   data() {
     return {
@@ -111,7 +138,9 @@ export default {
       settings: {
         enable_booking: false,
         time_zone: "",
-        number_of_slots: ""
+        number_of_slots: "",
+        slot_duration: "",
+        time_type:""
       },
       IMG_URL: '',
       timeZones: [],
@@ -123,13 +152,20 @@ export default {
         business_description: "",
         business_logo: ""
       },
-      logoFile: null
+      enable_booking_btn: false,
+      logoFile: null,
+      loader_save: false
     };
   },
   computed:{
     bookingUrl() {
-      const business_id = localStorage.getItem("business_id");
-      return `https://appointme.tech/book/${business_id}`;
+      return `https://appointme.tech/book/${this.user.business_id}`;
+    },
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
     }
   },
   created() {
@@ -140,11 +176,11 @@ export default {
   },
   methods: {
     fetchSettings() {
-      const token = localStorage.getItem("token");
-      const business_id = localStorage.getItem("business_id");
+ 
+      const business_id = this.user.business_id;
       axios
         .get(api.API_URL + "/settings", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${this.token}` },
           params: { business_id }
         })
         .then(response => {
@@ -154,35 +190,35 @@ export default {
         });
     },
     updateSettings() {
-      const token = localStorage.getItem("token");
+      this.loader_save = true;
       const payload = { 
         ...this.settings,
-        business_id: localStorage.getItem("business_id")
+        business_id: this.user.business_id
       };
       axios
         .post(api.API_URL + "/settings", payload, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${this.token}` }
         })
         .then(() => {
+          this.loader_save = false;
           this.notifyVue("top", "center", "success", "Settings updated successfully", "ti-announcement");
         });
     },
     fetchBusinessProfile() {
-      const token = localStorage.getItem("token");
-      const business_id = localStorage.getItem("business_id");
+      
+      const business_id = this.user.business_id;
       axios
         .get(api.API_URL + `/business-profile/${business_id}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${this.token}` }
         })
         .then(response => {
           this.businessProfile = response.data;
         });
     },
     fetchTimeZones() {
-      const token = localStorage.getItem("token");
       axios.get(api.API_URL + "/timezones",
       {
-       headers: { Authorization: `Bearer ${token}` }
+       headers: { Authorization: `Bearer ${this.token}` }
       })
       .then(response => {
         this.timeZones = response.data.timezones;
@@ -195,10 +231,8 @@ export default {
       this.logoFile = event.target.files[0];
     },
     updateBusinessProfile() {
-      const token = localStorage.getItem("token");
-      const business_id = localStorage.getItem("business_id");
       let self = this;
-
+      this.loader_save = true;
       // Use FormData to handle file uploads along with other fields
       const formData = new FormData();
       formData.append('business_name', this.businessProfile.business_name);
@@ -213,12 +247,13 @@ export default {
       }
 
       axios
-        .post(api.API_URL + `/business-profile/${business_id}`, formData, {
+        .post(api.API_URL + `/business-profile/${this.user.business_id}`, formData, {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${this.token}`
           }
         })
         .then(response => {
+          this.loader_save = false;
           // Update businessProfile with response data (including logo URL)
           self.businessProfile = response.data.business || self.businessProfile;
           self.notifyVue("top", "center", "success", "Business Profile updated successfully", "ti-announcement");
@@ -260,6 +295,10 @@ export default {
     timeZonesLabel(time) {
       return `${time}`;
     },
+    enable_book_btn(value){
+       // Update the local flag for showing the booking link container
+      this.enable_booking_btn = value;
+    }
   }
 };
 </script>

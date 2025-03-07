@@ -174,6 +174,9 @@ import Loader from "@/components/Loader";
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { FCM } from '@capacitor-community/fcm';
+import store from '@/store';
+import { mapState, mapMutations } from 'vuex';
+
 
 export default {
   components: {
@@ -202,13 +205,17 @@ export default {
       .then(({ data }) => {
         this.loader = false;
 
-        localStorage.setItem("token", data.access_token);
-        localStorage.setItem("role_id", data.user.role_id);
-        localStorage.setItem("role_name", data.user.role_name);
-        localStorage.setItem("fullname", data.user.first_name + ' ' + data.user.last_name);
-        localStorage.setItem("user_id", data.user.id);
-        localStorage.setItem("business_id", data.user.business_id);
-        localStorage.setItem("business_name", data.user.business_name);
+        // localStorage.setItem("token", data.access_token);
+        // localStorage.setItem("role_id", data.user.role_id);
+        // localStorage.setItem("role_name", data.user.role_name);
+        // localStorage.setItem("fullname", data.user.first_name + ' ' + data.user.last_name);
+        // localStorage.setItem("user_id", data.user.id);
+        // localStorage.setItem("business_id", data.user.business_id);
+        // localStorage.setItem("business_name", data.user.business_name);
+
+        store.commit('setUser', data.user); 
+        store.commit('setAccessToken', data.access_token);
+        store.commit('setSettings', data.user.settings);
         
         if (data.user.business_id === null) {
           this.$router.push('/update-business');

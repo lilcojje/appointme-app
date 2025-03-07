@@ -6,7 +6,12 @@
 </template>
 
 <script>
-export default {};
+export default {
+  created() {
+    // Initialize Vuex state from localStorage
+    this.$store.dispatch('initialize');
+  }
+};
 </script>
 
 <style lang="scss">

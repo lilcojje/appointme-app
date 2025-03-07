@@ -29,7 +29,7 @@
                 </select>
               </div>
               <div class="col-6">
-                <p-button type="info" round @click.native.prevent="modalAddAppointment" id="add-appointment">
+                <p-button type="info" round @click.native.prevent="modalAddAppointment" id="add-appointment" v-show="user.permissions.includes('add_appointments')">
                   Add Appointment
                 </p-button>
               </div>
@@ -76,13 +76,13 @@
                     </span>
                   </td>
                   <td class="action">
-                    <p-button type="info" round @click.native.prevent="editEvent(appointment)">
+                    <p-button type="info" round @click.native.prevent="editEvent(appointment)" v-show="user.permissions.includes('edit_appointments')">
                       <span class="ti-pencil"></span>
                     </p-button>
-                    <p-button type="info" round @click.native.prevent="deleteAppointment(appointment.id)">
+                    <p-button type="info" round @click.native.prevent="deleteAppointment(appointment.id)" v-show="user.permissions.includes('delete_appointments')">
                       <span class="ti-trash"></span>
                     </p-button>
-                    <p-button type="info" round @click.native.prevent="approveAppointment(appointment)">
+                    <p-button type="info" round @click.native.prevent="approveAppointment(appointment)" v-show="user.permissions.includes('approve_appointments')">
                       <span class="ti-thumb-up"></span>
                     </p-button>
                   </td>
@@ -337,6 +337,14 @@ export default {
       isDateChanged:false
     };
   },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
+  },
   methods: {
     async list(page = 1) {
       let self = this;
@@ -368,13 +376,13 @@ export default {
       let to = this.to_value === "" ? this.getMonthEnd() : this.to_value;
       self.page = page;
       self.loader = true;
-      const business_id = localStorage.getItem("business_id");
+     
       await axios
         .get(
           api.API_URL +
-           `/appointment?page=${page}&limit=${limit}&from=${from}&to=${to}&search=${this.search_text}&status=${this.selectedStatus}&business_id=${business_id}`,
+           `/appointment?page=${page}&limit=${limit}&from=${from}&to=${to}&search=${this.search_text}&status=${this.selectedStatus}&business_id=${self.user.business_id}`,
           {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            headers: { Authorization: `Bearer ${self.token}` }
           }
         )
         .then(({ data }) => {
@@ -468,7 +476,7 @@ export default {
             time: self.info.time,
             date: self.info.date,
             services: self.selectedService,
-            business_id: localStorage.getItem("business_id"),
+            business_id: self.user.business_id,
             client_type: self.info.client_type,
             source: 'System Encoded',
             status: self.info.status,
@@ -479,7 +487,7 @@ export default {
             })
           },
           {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            headers: { Authorization: `Bearer ${self.token}` }
           }
         )
         .then((data) => {
@@ -514,7 +522,7 @@ export default {
         });
     },
     updateAppointment() {
-      const token = localStorage.getItem("token");
+
       let self = this;
       // --- Validations for Update Appointment ---
       if (!self.info.client_type && self.info.client_type == "new") {
@@ -572,12 +580,12 @@ export default {
             date: self.info.date,
             services: self.selectedService,
             status: self.info.status,
-            business_id: localStorage.getItem("business_id"),
+            business_id: self.user.business_id,
             client_type: self.info.client_type,
             client_id: self.info.client_type === "existing" ? self.selectedClient.id : null
           },
           {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${self.token}` }
           }
         )
         .then((data) => {
@@ -667,7 +675,7 @@ export default {
       this.getTimeList();
     },
     deleteAppointment(id) {
-      const token = localStorage.getItem("token");
+
       this.loader_save = true;
       let self = this;
       self.calendar_list = false;
@@ -684,7 +692,7 @@ export default {
         if (result.isConfirmed) {
           axios
             .delete(api.API_URL + "/appointment/delete/" + id, {
-              headers: { Authorization: `Bearer ${token}` }
+              headers: { Authorization: `Bearer ${self.token}` }
             })
             .then((data) => {
               self.was_delete = true;
@@ -771,7 +779,7 @@ export default {
       self.loader_save = true;
       axios
         .get(api.API_URL + `/client?search=${text}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${self.token}` }
         })
         .then(({ data }) => {
           self.loader_save = false;
@@ -795,8 +803,8 @@ export default {
     },
     fetchServiceOptions() {
       axios
-        .get(api.API_URL + `/service?business_id=${localStorage.getItem("business_id")}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        .get(api.API_URL + `/service?business_id=${this.user.business_id}`, {
+          headers: { Authorization: `Bearer ${this.token}` }
         })
         .then(({ data }) => {
           this.serviceOptions = data.data.map((service) => ({
@@ -817,8 +825,8 @@ export default {
     fetchClients(searchText) {
       this.isLoadingClients = true;
       axios
-        .get(api.API_URL + `/client?search=${searchText}&business_id=${localStorage.getItem("business_id")}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        .get(api.API_URL + `/client?search=${searchText}&business_id=${this.user.business_id}`, {
+          headers: { Authorization: `Bearer ${this.token}` }
         })
         .then(({ data }) => {
           this.items = data.data;
@@ -836,8 +844,8 @@ export default {
         this.loader_save = true;
 
         return axios
-            .get(api.API_URL + `/availability-list?business_id=${localStorage.getItem("business_id")}&date=${date}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            .get(api.API_URL + `/availability-list?business_id=${self.user.business_id}&date=${date}`, {
+                headers: { Authorization: `Bearer ${self.token}` }
             })
             .then(({ data }) => {
                 self.loader_save = false;
@@ -932,11 +940,11 @@ export default {
         year: "numeric",
         month: "2-digit"
       });
-      const businessId = localStorage.getItem("business_id");
+
       self.loader = true;
       axios
-        .get(api.API_URL + `/appointment/calendar?filter=${month_year}&business_id=${businessId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        .get(api.API_URL + `/appointment/calendar?filter=${month_year}&business_id=${this.user.business_id}`, {
+          headers: { Authorization: `Bearer ${this.token}` }
         })
         .then(({ data }) => {
           self.loader = false;
@@ -960,8 +968,8 @@ export default {
       this.services = "";
       axios
         .get(api.API_URL + `/appointment/show/${info.event.id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          params: { business_id: localStorage.getItem("business_id") }
+          headers: { Authorization: `Bearer ${self.token}` },
+          params: { business_id: self.user.business_id }
         })
         .then(({ data }) => {
           self.loader = false;
@@ -1041,11 +1049,11 @@ export default {
 
           this.loader = true;
             // Post to the endpoint using businessId and include appointment id in the payload, with authorization token in the header
-            axios.post(`${api.API_URL}/confirm-appointment/${localStorage.getItem("business_id")}`, {
+            axios.post(`${api.API_URL}/confirm-appointment/${this.user.business_id}`, {
                 appointment: appointment.id,
                 confirm: 1
             }, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                headers: { Authorization: `Bearer ${this.token}` }
             })
             .then(response => {
                 this.loader = false;

@@ -206,6 +206,13 @@ export default {
       specificDate: null, // For Daily Appointment Schedule
       reportData: null, // Data returned from the API
     };
+  },computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
   },
   methods: {
     resetFilters() {
@@ -236,7 +243,7 @@ export default {
       try {
         const response = await axios.get(`${api.API_URL}/report`, {
           params: params,
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: `Bearer ${this.token}` },
         });
         this.reportData = response.data;
       } catch (error) {
@@ -249,7 +256,7 @@ export default {
   },
   created() {
     // Initialize business_id from localStorage (or from props)
-    this.business_id = localStorage.getItem("business_id") || "";
+    this.business_id = this.user.business_id || "";
   },
 };
 </script>

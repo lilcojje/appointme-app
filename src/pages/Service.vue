@@ -9,10 +9,10 @@
                 <input type="text" v-model="search_value" @input="search" id="search" />
               </div>
               <div class="col-6">
-                <p-button type="info" round @click.native.prevent="modalAddService" id="add-service">
+                <p-button type="info" round @click.native.prevent="modalAddService" id="add-service" v-show="user.permissions.includes('add_services')">
                   Add Services
                 </p-button>
-                <p-button type="info" round @click.native.prevent="redirectTocat" id="add-categories">
+                <p-button type="info" round @click.native.prevent="redirectTocat" id="add-categories" v-show="user.permissions.includes('view_permissions')">
                   Categories
                 </p-button>
               </div>
@@ -29,12 +29,14 @@
                 <tr v-for="(service,index) in services.data" :key="index">
                   <td style="text-align: center;">{{ service.name }}</td>
                   <td style="text-align: center;">{{ service.price }}</td>
-                  <td style="text-align: center;">{{ service.service_category.name }}</td>
+                  <td style="text-align: center;">
+                    {{ service.service_category ? service.service_category.name : 'N/A' }}
+                  </td>
                   <td style="text-align: center;" class="action">
-                    <p-button type="info" round @click.native.prevent="modalEditService(service)">
+                    <p-button type="info" round @click.native.prevent="modalEditService(service)" v-show="user.permissions.includes('edit_services')">
                       <span class="ti-pencil"></span>
                     </p-button>
-                    <p-button type="info" round @click.native.prevent="deleteService(service.id)">
+                    <p-button type="info" round @click.native.prevent="deleteService(service.id)" v-show="user.permissions.includes('delete_services')">
                       <span class="ti-trash"></span>
                     </p-button>
                   </td>
@@ -175,6 +177,13 @@ export default {
         price: "",
       },
     };
+  },computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
   },
   methods: {
     async list(page = 1) {
@@ -188,11 +197,9 @@ export default {
       await axios
         .get(
           api.API_URL +
-            `/service?page=${page}&limit=${limit}&search=${search_val}&business_id=${localStorage.getItem(
-              "business_id"
-            )}`,
+            `/service?page=${page}&limit=${limit}&search=${search_val}&business_id=${this.user.business_id}`,
           {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            headers: { Authorization: `Bearer ${this.token}` },
           }
         )
         .then(({ data }) => {
@@ -261,7 +268,6 @@ export default {
     addService() {
       if (!this.validateForm()) return;
 
-      const token = localStorage.getItem("token");
       this.loader_save = true;
       let self = this;
       this.add_btn = false;
@@ -274,10 +280,10 @@ export default {
             description: self.info.description,
             price: self.info.price,
             category_id: self.info.category_id,
-            business_id: localStorage.getItem("business_id"),
+            business_id: this.user.business_id,
           },
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${this.token}` },
           }
         )
         .then((data) => {
@@ -338,7 +344,7 @@ export default {
     },
     updateService() {
       if (!this.validateForm()) return;
-      const token = localStorage.getItem("token");
+  
       this.loader_save = true;
       let self = this;
       axios
@@ -350,7 +356,7 @@ export default {
             contact_number: self.info.contact_number,
           },
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${this.token}` },
           }
         )
         .then((data) => {
@@ -441,7 +447,7 @@ export default {
       this.info.id = service.id;
     },
     deleteService(id) {
-      const token = localStorage.getItem("token");
+    
       this.loader_save = true;
       let self = this;
 
@@ -457,7 +463,7 @@ export default {
         if (result.isConfirmed) {
           axios
             .delete(api.API_URL + "/service/" + id, {
-              headers: { Authorization: `Bearer ${token}` },
+              headers: { Authorization: `Bearer ${this.token}` },
             })
             .then((data) => {
               self.loader_save = false;
@@ -538,7 +544,7 @@ export default {
       this.search_value = text;
       axios
         .get(api.API_URL + `/service?search=${text}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: `Bearer ${this.token}` },
         })
         .then(({ data }) => {
           self.loader = false;
@@ -557,9 +563,9 @@ export default {
       try {
         const { data } = await axios.get(
           api.API_URL +
-            `/service-category?business_id=${localStorage.getItem("business_id")}`,
+            `/service-category?business_id=${this.user.business_id}`,
           {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            headers: { Authorization: `Bearer ${this.token}` },
           }
         );
         this.categories = data.data.data;

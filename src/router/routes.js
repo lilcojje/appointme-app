@@ -51,7 +51,7 @@ const routes = [
         name: "dashboard",
         component: Dashboard,
         meta: {
-          requiresAuth: true 
+          requiredPermission: "view_dashboard" 
         }
       },
       {
@@ -59,7 +59,7 @@ const routes = [
         name: "clients",
         component: Clients,
         meta: {
-          requiresAuth: true 
+          requiredPermission: "view_clients"  
         }
       },
       {
@@ -75,7 +75,7 @@ const routes = [
         name: "appointments",
         component: Appointments,
         meta: {
-          requiresAuth: true 
+          requiredPermission: "view_appointments"  
         }
       },
       {
@@ -83,8 +83,7 @@ const routes = [
         name: "reports",
         component: Reports,
         meta: {
-          requiresAuth: true,
-          requiresAdmin: true  
+          requiredPermission: "view_reports"
         }
       },
       {
@@ -92,8 +91,7 @@ const routes = [
         name: "services",
         component: Services,
         meta: {
-          requiresAuth: true,
-          requiresAdmin: true  
+          requiredPermission: "view_services"
         }
       },
       {
@@ -101,7 +99,7 @@ const routes = [
         name: "services Category",
         component: ServicesCat,
         meta: {
-          requiresAuth: true
+          requiredPermission: "view_category_services"
         }
       },
       {
@@ -109,7 +107,7 @@ const routes = [
         name: "schedule availability",
         component: ScheduleAvailability,
         meta: {
-          requiresAuth: true
+          requiredPermission: "view_availability"
         }
       },
       {
@@ -117,23 +115,20 @@ const routes = [
         name: "users",
         component: Users,
         meta: {
-          requiresAuth: true 
+          requiredPermission: "view_users"
         }
       },
       {
         path: "profile",
         name: "profile",
         component: UserProfile,
-        meta: {
-          requiresAuth: true 
-        }
       },
       {
         path: "user-permission",
         name: "User Permission",
         component: UserPermission,
         meta: {
-          requiresAuth: true 
+          requiredPermission: "view_permissions"
         }
       },
       {
@@ -171,8 +166,7 @@ const routes = [
         name: "settings",
         component: Settings,
         meta: {
-          requiresAuth: true,
-          requiresAdmin: true   
+          requiredPermission: "view_settings"
         }
       }
       
@@ -189,10 +183,6 @@ const routes = [
         path: '/admin/appointments/confirm/:id',
         name: "Confirm Appointment",
         component: ConfirmAppointment,
-        meta: {
-          requiresAuth: true,
-          requiresAdmin: true   
-        }
       }
       
     ],

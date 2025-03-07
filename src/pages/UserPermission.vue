@@ -126,6 +126,13 @@ export default {
       modal_title: '',
       btn_type: ''
     };
+  },computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
   },
   methods: {
     async list(page = 1) {
@@ -136,11 +143,11 @@ export default {
 
       try {
         const [rolesRes, permissionsRes] = await Promise.all([
-          axios.get(api.API_URL + `/roles?page=${page}&limit=${limit}&search=${self.search_value}&business_id=${localStorage.getItem('business_id')}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          axios.get(api.API_URL + `/roles?page=${page}&limit=${limit}&search=${self.search_value}&business_id=${this.user.business_id}`, {
+            headers: { Authorization: `Bearer ${this.token}` }
           }),
           axios.get(api.API_URL + '/permissions', {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            headers: { Authorization: `Bearer ${this.token}` }
           })
         ]);
 
@@ -166,9 +173,10 @@ export default {
       try {
         const response = await axios.post(api.API_URL + '/roles', {
           name: this.roleInfo.name,
+          business_id: this.user.business_id,
           permissions: this.roleInfo.selectedPermissions
         }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: { Authorization: `Bearer ${this.token}` }
         });
 
         this.$notify({
@@ -194,7 +202,7 @@ export default {
           name: this.roleInfo.name,
           permissions: this.roleInfo.selectedPermissions
         }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: { Authorization: `Bearer ${this.token}` }
         });
 
         this.$notify({
@@ -290,4 +298,5 @@ export default {
   border-bottom: none;
 }
 .action .btn-info{margin: 0 2px;}
+#add-role{float:right}
 </style>

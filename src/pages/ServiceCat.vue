@@ -112,7 +112,7 @@ export default {
           id:'',
           name: '',
           description: '',
-          business_id: localStorage.getItem('business_id')
+          business_id: ''
       },
       search_value:'',
       modal_title:'',
@@ -122,6 +122,13 @@ export default {
         name: ''
       }
     }
+  },computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
   },
   methods:{
     async list(page=1){
@@ -130,9 +137,9 @@ export default {
            self.page = page;
            self.loader = true;
 
-           await axios.get(api.API_URL+`/service-category?page=${page}&limit=${limit}&search=${this.search_value}&business_id=${this.info.business_id}`,
+           await axios.get(api.API_URL+`/service-category?page=${page}&limit=${limit}&search=${this.search_value}&business_id=${this.user.business_id}`,
              {
-               headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+               headers: { Authorization: `Bearer ${this.token}` }
              }
            ).then(({data})=>{
              self.loader = false;
@@ -173,7 +180,7 @@ export default {
       this.add_btn = false;
       
       axios.post(api.API_URL+'/service-category', this.info,
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}`} }
+        { headers: { Authorization: `Bearer ${this.token}`} }
       ).then(() => {
           self.loader_save = false;
           self.notifyVue('top', 'center','success','Category Successfully Added','ti-announcement')
@@ -192,7 +199,7 @@ export default {
       let self = this;
       
       axios.put(api.API_URL+'/service-category/'+this.info.id, this.info,
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}`} }
+        { headers: { Authorization: `Bearer ${this.token}`} }
       ).then(() => {
           self.loader_save = false;
           self.notifyVue('top', 'center','success','Category Successfully Updated','ti-announcement')
@@ -216,7 +223,7 @@ export default {
           if (result.isConfirmed) {
               let self = this;
               axios.delete(api.API_URL + '/service-category/' + id, {
-                  headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                  headers: { Authorization: `Bearer ${this.token}` }
               })
               .then(() => {
                   Swal.fire("Deleted!", "Category Successfully Deleted.", "success");
@@ -235,7 +242,7 @@ export default {
         id: '',
         name: '',
         description: '',
-        business_id: localStorage.getItem('business_id')
+        business_id: this.user.business_id
       };
     },
     handleError(error) {
@@ -278,6 +285,7 @@ export default {
   },
   created() {
       this.list();
+      this.info.business_id = this.user.business_id
   }
 };
 </script>

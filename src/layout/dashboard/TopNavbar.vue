@@ -15,7 +15,7 @@
       </button>
       <div class="collapse navbar-collapse">
       </div>
-      <a class="nav-link" id="view-form" @click="viewForm" v-if="settings.enable_booking"><span class="ti-eye"></span>View Form</a>
+      <a class="nav-link" id="view-form" @click="viewForm" v-if="enableBooking"><span class="ti-eye"></span>View Form</a>
       <drop-down
           class="nav-item"
           :title="fullname"
@@ -40,14 +40,31 @@ export default {
       const { name } = this.$route;
       return this.capitalizeFirstLetter(name);
     },
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    },
+    settings() {
+      // Ensure it's an array
+      return this.$store.state.settings;
+    },
+    enableBooking() {
+      const plainSettings = JSON.parse(JSON.stringify(this.settings));
+
+      const enableBookingValue = plainSettings.enable_booking;
+
+      return enableBookingValue == 1 ? true : false;
+      // const setting = plainSettings.find(item => item.key === 'enable_booking');
+      // // Convert the value "1" to boolean true, otherwise return false
+      // return setting ? setting.value == "1" : false;
+    }
   },
   data() {
     return {
       activeNotifications: false,
-      fullname: '',
-      settings: {
-        enable_booking: ""
-      },
+      fullname: ''
     };
   },
   methods: {
@@ -67,16 +84,17 @@ export default {
       this.$sidebar.displaySidebar(false);
     },
     logout(){
-            const token = localStorage.getItem('token');
             axios.post(api.API_URL+'/logout', {
                 },
                 
                 {
-                 headers: { Authorization: `Bearer ${token}`}
+                 headers: { Authorization: `Bearer ${this.token}`}
                 }
                 )
                     .then((data) => {
                          localStorage.clear();
+                         this.$store.dispatch('clearStore');
+
                         this.$router.push({name: 'login'})
                     })
                     .catch((response) => {
@@ -90,29 +108,16 @@ export default {
       this.$router.replace('/profile');
     },
     viewForm() {
-      const business_id = localStorage.getItem("business_id");
+      const business_id = this.user.business_id;
       // Resolve the URL using Vue Router (optional but recommended for proper routing)
       const url = this.$router.resolve({ path: '/book/' + business_id }).href;
       window.open(url, '_blank');
     },
-    fetchSettings() {
-      const token = localStorage.getItem("token");
-      const business_id = localStorage.getItem("business_id");
-      axios
-        .get(api.API_URL + "/settings", {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { business_id }
-        })
-        .then(response => {
-          const data = response.data;
-          data.enable_booking = !!Number(data.enable_booking);
-          this.settings = response.data;
-        });
-    },
+   
   },
   created(){
-    this.fullname = localStorage.getItem('fullname');
-    this.fetchSettings();
+    this.fullname = this.user.first_name + ' ' + this.user.last_name;
+    console.log(this.enableBooking);
   }
 };
 

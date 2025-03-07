@@ -223,6 +223,13 @@ export default {
       },
       isLoadingTimeZones: false
     };
+  },computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
   },
   methods: {
     validateForm() {
@@ -241,7 +248,7 @@ export default {
     updateProfile() {
       this.loader = true;
       axios.post(`${api.API_URL}/business-update`, {
-          user_id: this.user_id,
+          user_id: this.user.id,
           business_name: this.business_name,
           business_email: this.business_email,
           business_address: this.business_address,
@@ -252,15 +259,19 @@ export default {
       .then(response => {
         localStorage.setItem("business_id", response.data.business.id);
         localStorage.setItem("business_name", response.data.business.business_name);
+
+        this.$store.commit('updateUserBusinessName', response.data.business.business_name);
+
+
         this.loader = false;
         this.updateSuccess = true;
-      })
-      .catch(error => {
-          this.loader = false;
-          if (error.response && error.response.data) {
-            this.notifyVue("top", "center", "danger", error.response.data.message, "ti-hand-stop");
-          } 
+      }).catch(error => {
+        this.loader = false;
+        if (error.response && error.response.data) {
+          this.notifyVue("top", "center", "danger", error.response.data.message, "ti-hand-stop");
+        }
       });
+
     },
     notifyVue(position, alignment, type, message, icon) {
       this.$notify({
@@ -272,10 +283,10 @@ export default {
       });
     },
     fetchTimeZones() {
-      const token = localStorage.getItem("token");
+
       this.isLoadingTimeZones = true;
       axios.get(api.API_URL + "/timezones", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${this.token}` }
       })
       .then(response => {
         this.timeZones = response.data.timezones;
@@ -298,11 +309,15 @@ export default {
     },
   },
   created() {
-    this.user_id = localStorage.getItem('user_id');
+
+    if(this.user.business_name){
+      this.$router.push('/dashboard');
+    }
+    
     this.fetchTimeZones();
-    // if (!localStorage.getItem('user_id')) {
-    //   this.redirectToLogin();
-    // }
+    if (!this.user.id) {
+      this.redirectToLogin();
+    }
   }
 };
 </script>

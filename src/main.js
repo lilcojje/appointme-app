@@ -21,6 +21,7 @@ import PaperDashboard from "./plugins/paperDashboard";
 import "vue-notifyjs/themes/default.css";
 
 import firebaseMessaging from './firebase';
+import store from './store';  
 
 Vue.config.productionTip = false;
 
@@ -28,6 +29,7 @@ Vue.use(PaperDashboard);
 
 /* eslint-disable no-new */
 new Vue({
+  store,
   router,
   render: (h) => h(App),
   created() {

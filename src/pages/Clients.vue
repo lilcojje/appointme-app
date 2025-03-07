@@ -9,7 +9,7 @@
                 <input type="text" v-model="search_value" @input="search" id="search">
               </div>
               <div class="col-6">
-                <p-button type="info" round @click.native.prevent="modalAddClient" id="add-client">
+                <p-button type="info" round @click.native.prevent="modalAddClient" id="add-client" v-show="user.permissions.includes('add_clients')">
                   Add Client
                 </p-button>
               </div>
@@ -32,13 +32,13 @@
                   <td style="text-align: center;">{{ client.contact_number }}</td>
                   <td style="text-align: center;">{{ dateToString(client.created_at) }}</td>
                   <td class="action">
-                    <p-button type="info" round @click.native.prevent="modalEditClient(client)">
+                    <p-button type="info" round @click.native.prevent="modalEditClient(client)" v-show="user.permissions.includes('edit_clients')">
                       <span class="ti-pencil"></span>
                     </p-button>
-                    <p-button type="info" round @click.native.prevent="transaction(client)">
+                    <!-- <p-button type="info" round @click.native.prevent="transaction(client)">
                       <span class="ti-eye"></span>
-                    </p-button>
-                    <p-button type="info" round @click.native.prevent="deleteClient(client.id)" v-if="role==1">
+                    </p-button> -->
+                    <p-button type="info" round @click.native.prevent="deleteClient(client.id)" v-show="user.permissions.includes('delete_clients')">
                       <span class="ti-trash"></span>
                     </p-button>
                   </td>
@@ -153,6 +153,14 @@ export default {
       business_id: ''
     }
   },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
+  },
   methods:{
     async list(page=1){
       let self = this;
@@ -161,9 +169,9 @@ export default {
       self.page = page;
       self.loader = true;
 
-      await axios.get(api.API_URL+`/client?page=${page}&limit=${limit}&search=${search_val}&business_id=${localStorage.getItem('business_id')}`,
+      await axios.get(api.API_URL+`/client?page=${page}&limit=${limit}&search=${search_val}&business_id=${self.user.business_id}`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: { Authorization: `Bearer ${self.token}` }
         }
       ).then(({data})=>{
         self.loader = false;
@@ -222,7 +230,7 @@ export default {
 
     addClient(){
       if (!this.validateForm()) return;
-      const token = localStorage.getItem('token');
+
       this.loader_save = true;
       let self = this;
       this.add_btn = false;
@@ -231,10 +239,10 @@ export default {
         last_name: self.info.last_name,
         email: self.info.email,             // Send email in the payload
         contact_number: self.info.contact_number,
-        business_id : localStorage.getItem('business_id')
+        business_id : self.user.business_id
       },
       {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${this.token}` }
       }
       )
       .then((data) => {
@@ -266,7 +274,7 @@ export default {
     },
     updateClient(){
       if (!this.validateForm()) return;
-      const token = localStorage.getItem('token');
+    
       this.loader_save = true;
       let self = this;
       axios.put(api.API_URL+'/client/update/'+self.info.id, {
@@ -276,7 +284,7 @@ export default {
         contact_number: self.info.contact_number,
       },
       {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${this.token}` }
       }
       )
       .then((data) => {
@@ -359,7 +367,7 @@ export default {
       this.search_value = text;
       axios.get(api.API_URL+`/client?search=${text}`,
       {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${self.token}` }
       }
       ).then(({data})=>{
         self.loader = false;
@@ -371,7 +379,7 @@ export default {
       })
     },
     deleteClient(id){
-      const token = localStorage.getItem('token');
+   
       this.loader_save = true;
       let self = this;
 
@@ -388,7 +396,7 @@ export default {
         if (result.isConfirmed) {
           axios
             .delete(api.API_URL + "/client/delete/" + id, {
-              headers: { Authorization: `Bearer ${token}` }
+              headers: { Authorization: `Bearer ${this.token}` }
             })
             .then(() => {
               self.loader_save = false;
@@ -433,8 +441,9 @@ export default {
   },
   created() {
     this.list();
-    this.role = localStorage.getItem('role_id');
-    this.business_id = localStorage.getItem('business_id');
+
+    this.role = this.user.role_id;
+    this.business_id = this.user.business_id;
   }
 };
 </script>

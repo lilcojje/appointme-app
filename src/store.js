@@ -1,30 +1,47 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import axios from 'axios';
+import createPersistedState from 'vuex-persistedstate';
 
 Vue.use(Vuex);
 
-export default new Vuex.Store({
-  state: {
+// Helper function to return the default state
+const getDefaultState = () => {
+  return {
     user: null,
-    // Store permissions as an array of permission names for simplicity
-    permissions: []
-  },
+    permissions: [],
+    token: null,
+    settings: {}
+  };
+};
+
+export default new Vuex.Store({
+  state: getDefaultState(),
   mutations: {
     setUser(state, user) {
       state.user = user;
-      // Extract permission names from the user's permissions (from the API)
-      state.permissions = user.permissions.map(p => p.name);
+      // Extract permission names from the user's permissions
+      state.permissions = user.permissions;
+
+    },
+    setSettings(state, settings) {
+      state.settings = settings;
+    },
+    setAccessToken(state, token) {
+      state.token = token;
+    },
+    // Mutation to reset the state to its default values
+    RESET_STATE(state) {
+      Object.assign(state, getDefaultState());
+    },
+    updateUserBusinessName(state, newName) {
+      state.user.business_name = newName;
     }
   },
   actions: {
-    login({ commit }, credentials) {
-      return axios.post('http://your-api-domain/api/login', credentials)
-        .then(response => {
-          commit('setUser', response.data.user);
-          // Set token for future API calls
-          axios.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.token;
-        });
+    // Action to clear the Vuex store; call this.$store.dispatch('clearStore') from your component
+    clearStore({ commit }) {
+      commit('RESET_STATE');
     }
-  }
+  },
+  plugins: [createPersistedState()]
 });

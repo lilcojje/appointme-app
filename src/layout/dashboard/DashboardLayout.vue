@@ -2,57 +2,67 @@
   <div class="wrapper">
     <side-bar>
       <template slot="links">
-        <sidebar-link to="/dashboard" name="Dashboard" icon="ti-panel" />
+        <sidebar-link
+          to="/dashboard"
+          name="Dashboard"
+          icon="ti-panel"
+          v-if="hasPermission('view_dashboard')"
+        />
         <sidebar-link
           to="/clients"
           name="Clients"
           icon="ti-view-list-alt"
+          v-if="hasPermission('view_clients')"
         />
         <sidebar-link
           to="/services"
           name="Services"
           icon="ti-clipboard"
+          v-if="hasPermission('view_services')"
         />
-       <sidebar-link
+        <sidebar-link
           to="/appointments"
           name="Appointments"
           icon="ti-calendar"
+          v-if="hasPermission('view_appointments')"
         />
         <sidebar-link
           to="/availability"
           name="Availability"
           icon="ti-time"
+          v-if="hasPermission('view_availability')"
         />
         <sidebar-link
           to="/users"
           name="Users"
           icon="ti-user"
+          v-if="hasPermission('view_users')"
         />
-        <!--<sidebar-link
+        <!--
+        <sidebar-link
           to="/transactions"
           name="Transactions"
           icon="ti-layout-list-post"
         />
-       <sidebar-link
+        <sidebar-link
           to="/expenses"
           name="Expenses"
           icon="ti-money"
-          v-if="role_id==1"
-        />-->
+          v-if="hasPermission('view_expenses')"
+        />
+        -->
         <sidebar-link
           to="/reports"
           name="Reports"
           icon="ti-timer"
-          v-if="role_id==1"
+          v-if="hasPermission('view_reports')"
         />
-
         <sidebar-link
           to="/settings"
           name="Settings"
           icon="ti-settings"
-          v-if="role_id==1"
+          v-if="hasPermission('view_settings')"
         />
-        
       </template>
       <mobile-menu>
         <li class="nav-item">
@@ -91,6 +101,13 @@ export default {
     return{
       role_id: '',
     }
+  },computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
   },
   methods: {
     toggleSidebar() {
@@ -99,12 +116,12 @@ export default {
       }
     },
     logout(){
-            const token = localStorage.getItem('token');
+            
             axios.post(api.API_URL+'/logout', {
                 },
                 
                 {
-                 headers: { Authorization: `Bearer ${token}`}
+                 headers: { Authorization: `Bearer ${this.token}`}
                 }
                 )
                     .then((data) => {
@@ -116,10 +133,16 @@ export default {
                             this.$router.push({name: 'login'})
                           }
                     });
+    },
+    hasPermission(permission) {
+      // Adjust the property path if your permissions are nested under a role.
+      // For example, if your user object stores permissions under "role.permissions",
+      // you might use: this.user.role && this.user.role.permissions.some(...)
+      return this.user.permissions && this.user.permissions.some(p => p === permission);
     }
   },
   created(){
-    this.role_id = localStorage.getItem('role_id');
+    this.role_name = this.user.role_name;
   }
 };
 </script>

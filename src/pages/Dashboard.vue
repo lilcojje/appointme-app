@@ -151,6 +151,12 @@ export default {
     };
   },
   computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    },
     totalTodayPages() {
       return Math.ceil(this.todaysAppointments.length / this.itemsPerPage);
     },
@@ -172,12 +178,10 @@ export default {
     async fetchDashboardData() {
       this.loader = true;
       try {
-        const token = localStorage.getItem('token');
-        const businessId = localStorage.getItem('business_id');
 
         const response = await axios.get(`${api.API_URL}/report/dashboard`, {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { business_id: businessId }
+          headers: { Authorization: `Bearer ${this.token}` },
+          params: { business_id: this.user.business_id }
         });
 
         this.totalClients = response.data.total_clients;
@@ -245,6 +249,8 @@ export default {
     }
   },
   mounted() {
+    // console.log(this.$store.state.user);
+
     this.fetchDashboardData();
   }
 };

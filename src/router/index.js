@@ -1,47 +1,50 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import routes from "./routes";
+import store from "../store";
+
+
 Vue.use(VueRouter);
 
-// configure router
+// Configure router
 const router = new VueRouter({
-  mode: 'history',
-  routes, // short for routes: routes
+  mode: "history",
+  routes,
   linkActiveClass: "active",
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   document.title = "AppointMe - " + to.name.toUpperCase();
 
-  if (to.meta.requiresAuth) {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // User is authenticated, proceed to the route
-      next();
-    } else {
-      // User is not authenticated, redirect to login
-      next('/login');
-    }
-  } else {
-    // Non-protected route, allow access
-    next();
+  // Load permissions if missing (replace with your action)
+  if (!store.state.permissions.length && store.state.token) {
+    await store.dispatch('fetchPermissions');
   }
 
-  if (to.meta.requiresAdmin) {
-    const role_id = localStorage.getItem('role_id');
-    if (role_id==1) {
-      // User is authenticated, proceed to the route
-      next();
-    } else {
-      // User is not authenticated, redirect to login
-      next('/login');
-    }
-  } else {
-    // Non-protected route, allow access
-    next();
+  const { token, permissions } = store.state;
+
+  // Public route? Allow access
+  if (!to.meta.requiresAuth && !to.meta.requiredPermission) {
+    return next();
   }
 
-  
+  // Not logged in? Redirect to login
+  if (!token) {
+    return next("/login");
+  }
+
+  // Route requires permission but it's not defined? Block access
+  if (to.meta.requiresAuth && !to.meta.requiredPermission) {
+    console.error(`Missing requiredPermission for route: ${to.name}`);
+    return next("/unauthorized");
+  }
+
+  // Check permissions
+  if (to.meta.requiredPermission && !permissions.includes(to.meta.requiredPermission)) {
+    return next("/unauthorized");
+  }
+
+  next();
 });
 
 export default router;

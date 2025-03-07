@@ -9,10 +9,10 @@
                 <input type="text" v-model="search_value" @input="search" id="search">
               </div>
               <div class="col-6">
-                <p-button type="info" round @click.native.prevent="modalAddUser" id="add-user">
+                <p-button type="info" round @click.native.prevent="modalAddUser" id="add-user" v-show="userData.permissions.includes('add_users')">
                   Add User
                 </p-button>
-                <p-button type="info" round @click.native.prevent="redirectToRoles" id="add-roles">
+                <p-button type="info" round @click.native.prevent="redirectToRoles" id="add-roles" v-show="userData.permissions.includes('view_permissions')">
                   Permissions
                 </p-button>
               </div>
@@ -33,10 +33,10 @@
                   <td style="text-align: center;">{{ user.email }}</td>
                   <td style="text-align: center;">{{ user.role.name }}</td>
                   <td style="text-align: center;" class="action">
-                    <p-button type="info" round @click.native.prevent="modalEditUser(user)">
+                    <p-button type="info" round @click.native.prevent="modalEditUser(user)" v-show="userData.permissions.includes('edit_users')">
                       <span class="ti-pencil"></span>
                     </p-button>
-                    <p-button type="info" round @click.native.prevent="deleteUser(user.id)">
+                    <p-button type="info" round @click.native.prevent="deleteUser(user.id)" v-show="userData.permissions.includes('delete_users')">
                       <span class="ti-trash"></span>
                     </p-button>
                   </td>
@@ -150,11 +150,7 @@ export default {
         role_id: '', // Replaced status with role
         notify_email: false
       },
-      roleOptions: [
-          { label: 'Admin', value: 1 },
-          { label: 'Staff', value: 2 },
-          { label: 'Client', value: 3 }
-      ],
+      roleOptions: [],
       search_value: '',
       modal_title: '',
       btn_type: '',
@@ -166,6 +162,13 @@ export default {
         password: ''
       }
     };
+  },computed: {
+    userData() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
   },
   methods: {
     async list(page = 1) {
@@ -176,9 +179,9 @@ export default {
       self.page = page;
       self.loader = true;
 
-      await axios.get(api.API_URL + `/user?page=${page}&limit=${limit}&search=${search_val}&business_id=${localStorage.getItem('business_id')}`,
+      await axios.get(api.API_URL + `/user?page=${page}&limit=${limit}&search=${search_val}&business_id=${this.userData.business_id}`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: { Authorization: `Bearer ${this.token}` }
         }
       ).then(({ data }) => {
         self.loader = false;
@@ -238,8 +241,6 @@ export default {
     addUser() {
       if (!this.validateForm()) return;
 
-      const token = localStorage.getItem('token');
-      const business_id = localStorage.getItem('business_id');
       this.loader_save = true;
       let self = this;
       this.add_btn = false;
@@ -251,10 +252,10 @@ export default {
         password: self.info.password,
         role_id: self.info.role, // Sending role instead of status
         notify_email: self.info.notify_email,
-        business_id: business_id
+        business_id: this.userData.business_id
       },
       {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${this.token}` }
       })
         .then(() => {
           self.loader_save = false;
@@ -280,8 +281,6 @@ export default {
     updateUser() {
       if (!this.validateForm()) return;
 
-      const token = localStorage.getItem('token');
-      const business_id = localStorage.getItem('business_id');
       this.loader_save = true;
       let self = this;
 
@@ -292,10 +291,10 @@ export default {
         password: self.info.password,
         role_id: self.info.role, // Sending role instead of status
         notify_email: self.info.notify_email,
-        business_id: business_id
+        business_id: this.userData.business_id
       },
       {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${this.token}` }
       })
         .then(() => {
           self.loader_save = false;
@@ -324,7 +323,7 @@ export default {
 
 
     deleteUser(id) {
-      const token = localStorage.getItem('token');
+
       this.loader_save = true;
       let self = this;
 
@@ -339,7 +338,7 @@ export default {
       }).then((result) => {
           if (result.isConfirmed) {
               axios.delete(api.API_URL + '/user/' + id, {
-                  headers: { Authorization: `Bearer ${token}` }
+                  headers: { Authorization: `Bearer ${this.token}` }
               })
               .then(() => {
                   self.loader_save = false;
@@ -400,10 +399,23 @@ export default {
     isValidEmail(email) {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailPattern.test(email);
-    }
+    },
+    // New method to fetch role options dynamically
+    async getRoles() {
+      try {
+        let response = await axios.get(api.API_URL + `/roles?business_id=${this.userData.business_id}`, {
+          headers: { Authorization: `Bearer ${this.token}` }
+        });
+        let rolesArray = response.data.data || [];
+        this.roleOptions = rolesArray.map(role => ({ label: role.name, value: role.id }));
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    },
   },
   created() {
     this.list();
+    this.getRoles();
   }
 };
 </script>

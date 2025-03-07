@@ -99,15 +99,22 @@ export default {
       roleOptions: [],
       businessOptions: []
     };
+  },computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
   },
   methods: {
     // Fetch roles dynamically from /roles and convert id to string
     fetchRoles() {
       const token = localStorage.getItem("token");
-      const business_id = localStorage.getItem("business_id");
+      const business_id = this.user.business_id;
       axios
         .get(api.API_URL + `/roles?business_id=${business_id}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${this.token}` }
         })
         .then(({ data }) => {
           this.roleOptions = data.data.map(role => ({
@@ -121,13 +128,13 @@ export default {
     },
     // Fetch user profile from /profile/{user_id} with business_id as a query parameter
     getProfile() {
-      const user_id = this.$route.params.user_id || localStorage.getItem("user_id");
+      const user_id = this.$route.params.user_id || this.user.id;
       const token = localStorage.getItem("token");
-      const business_id = localStorage.getItem("business_id");
+      const business_id = this.user.business_id;
       this.loader = true;
       axios
         .get(api.API_URL + "/profile/" + user_id, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${this.token}` },
           params: { business_id }
         })
         .then(({ data }) => {
@@ -179,7 +186,6 @@ export default {
     },
     updateProfile() {
       if (!this.validateForm()) return;
-      const token = localStorage.getItem("token");
       const user_id = this.info.id;
       this.loader_save = true;
       axios
@@ -194,7 +200,7 @@ export default {
             business_id: this.info.business
           },
           {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${this.token}` }
           }
         )
         .then(() => {

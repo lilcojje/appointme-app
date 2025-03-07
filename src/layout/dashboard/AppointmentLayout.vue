@@ -322,6 +322,9 @@ export default {
         })
         .then(response => {
           this.businessProfile = response.data;
+          const timeTypeSetting = this.businessProfile.setting.find(item => item.key === 'time_type');
+          const timeTypeValue = timeTypeSetting ? timeTypeSetting.value : null;
+          
         })
         .catch(error => {
           console.error("Error fetching business profile:", error);
@@ -908,6 +911,8 @@ export default {
       this.info.client_type = "existing";
       this.fetchRebookDetails();
     }
+
+    
   }
 };
 </script>
