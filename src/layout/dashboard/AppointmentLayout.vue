@@ -9,6 +9,8 @@
       </div>
     </transition>
     <h3 class="heading-center" v-if="isCancelView">Cancel Appointment</h3>
+    <!-- View Appointment Heading -->
+    <h3 class="heading-center" v-if="isView">Appointment Details</h3>
     <!-- Cancel View (only shown if not canceled) -->
     <transition name="fade">
       <div class="appointment-form cancel-form" v-if="isCancelView">
@@ -35,6 +37,18 @@
       </div>
     </transition>
 
+     <!-- View Mode: Read-only Appointment Details -->
+     <transition name="fade">
+      <div class="appointment-form view-form view-details" v-if="isView">
+        <loader v-if="loader_save" />
+        <p><strong>Appointment ID:</strong> {{ appointment_info.id }}</p>
+        <p><strong>Date:</strong> {{ formatDate(appointment_info.appointment_date) }}</p>
+        <p><strong>Time:</strong> {{ appointment_info.appointment_time }}</p>
+        <p><strong>Services:</strong> {{ appointment_info.services.join(', ') }}</p>
+    
+      </div>
+    </transition>
+
     <transition name="fade" v-if="isRescheduled">
       <div class="appointment-form canceled-display">
         <p class="cancel-message">
@@ -42,9 +56,9 @@
         </p>
       </div>
     </transition>
-    <h3 class="form-title" v-if="!isCancelView">Book Your Appointment</h3>
+    <h3 class="form-title" v-if="!isCancelView && !isView">Book Your Appointment</h3>
     <!-- New/Existing Buttons (hidden when rebooking) -->
-    <transition name="fade" v-if="!isCancelView && !isRebook">
+    <transition name="fade" v-if="!isCancelView && !isRebook && !isView">
       <div id="choose" v-if="!choose_show && !success_show">
         <p-button type="info" round @click.native.prevent="chooseNew" class="choices">
           New Client
@@ -56,7 +70,7 @@
     </transition>
 
     <!-- Appointment Form -->
-    <transition name="fade" v-if="!isCancelView && !isRescheduledView">
+    <transition name="fade" v-if="!isCancelView && !isRescheduledView && !isView">
       <div class="appointment-form" v-if="choose_show">
         <loader v-if="loader" />
         <!-- Suggested Title for the Appointment Form -->
@@ -308,7 +322,8 @@ export default {
       // New property to store business profile data including the logo
       businessProfile: {},
       minDate: this.getTodayDate(),
-      time_type: ''
+      time_type: '',
+      isView: false
     };
   },
   computed: {
@@ -926,6 +941,12 @@ export default {
       this.fetchRebookDetails();
     }
 
+    if (urlParams.has("view")) {
+      this.appointment_token = urlParams.get("view");
+      this.isView = true;
+      this.fetchAppointmentDetails();
+    }
+
     
   }
 };
@@ -1055,6 +1076,7 @@ export default {
 .business-title{text-align: center; margin-bottom: 60px;}
 
 .error-msg{color:red; font-weight: bold;}
+.view-details{text-align: center;}
 
 /* Media queries for mobile responsiveness */
 @media (max-width: 768px) {

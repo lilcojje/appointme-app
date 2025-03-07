@@ -36,7 +36,7 @@
                     <p-button type="info" round @click.native.prevent="modalEditUser(user)" v-show="userData.permissions.includes('edit_users')">
                       <span class="ti-pencil"></span>
                     </p-button>
-                    <p-button type="info" round @click.native.prevent="deleteUser(user.id)" v-show="userData.permissions.includes('delete_users')">
+                    <p-button type="info" round @click.native.prevent="deleteUser(user.id)" v-show="userData.permissions.includes('delete_users') && user.owner != 1">
                       <span class="ti-trash"></span>
                     </p-button>
                   </td>
@@ -92,7 +92,7 @@
       />
       <div class="form-group" data-v-701ac82d="">
         <label class="control-label">Role</label>
-        <select v-model="info.role" class="form-control" id="role-select">
+        <select v-model="info.role" class="form-control" id="role-select" :disabled="disable_role">
           <option value="" disabled>Select Role</option>
           <option v-for="role in roleOptions" :key="role.value" :value="role.value">
             {{ role.label }}
@@ -160,7 +160,8 @@ export default {
         last_name: '',
         email: '',
         password: ''
-      }
+      },
+      disable_role: false
     };
   },computed: {
     userData() {
@@ -392,6 +393,12 @@ export default {
       this.info.role = user.role.id; // Assign role to info
       this.info.id = user.id;
       this.info.notify_email = user.notify_email;
+    
+      if(parseInt(user.owner, 10)==1){
+        this.disable_role = true;
+      }else{
+        this.disable_role = false;
+      }
     },
     redirectToRoles() {
       this.$router.push('/user-permission');

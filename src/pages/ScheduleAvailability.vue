@@ -32,7 +32,6 @@
                   <th>End Time</th>
                   <th>Break Start</th>
                   <th>Break End</th>
-                  <th style="width: 12%; text-align: center;">Slot Duration</th>
                   <th style="width: 5%; text-align: center;">Available</th>
                   <th style="text-align: center;">Action</th>
                 </thead>
@@ -43,7 +42,6 @@
                     <td>{{ formatTime(schedule.end_time) }}</td>
                     <td>{{ schedule.break_start_time ? formatTime(schedule.break_start_time) : '-' }}</td>
                     <td>{{ schedule.break_end_time ? formatTime(schedule.break_end_time) : '-' }}</td>
-                    <td style="width: 5%; text-align: center;">{{ schedule.slot_duration }} mins</td>
                     <td style="width: 5%; text-align: center;">{{ schedule.is_available ? 'Yes' : 'No' }}</td>
                     <td class="action">
                       <p-button type="info" round @click.native.prevent="modalEditSchedule(schedule)" v-show="user.permissions.includes('edit_availability')">
