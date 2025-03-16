@@ -127,6 +127,7 @@ import axios from "axios";
 import api from "@/static/config.json";
 import Multiselect from "vue-multiselect";
 import Loader from "@/components/Loader";
+import store from '@/store';
 export default {
   components: {
     Multiselect,
@@ -159,7 +160,7 @@ export default {
   },
   computed:{
     bookingUrl() {
-      return `https://appointme.tech/book/${this.user.business_id}`;
+      return `https://app.appointme.tech/book/${this.user.business_id}`;
     },
     user() {
       return this.$store.state.user;
@@ -201,6 +202,7 @@ export default {
         })
         .then(() => {
           this.loader_save = false;
+          store.commit('enableOnlineBooking', this.settings.enable_booking==true ? 1 : 0);
           this.notifyVue("top", "center", "success", "Settings updated successfully", "ti-announcement");
         });
     },

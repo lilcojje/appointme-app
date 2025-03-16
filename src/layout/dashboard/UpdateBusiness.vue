@@ -5,12 +5,13 @@
       </div>
       <div id="business-profile-form" v-if="!updateSuccess">
         <loader v-show="loader"/>
+        <h3 class="heading-details">Business Details</h3>
         <form @submit.prevent="validateForm">
           <div class="row">
             <div class="col-md-12">
               <fg-input
                 type="text"
-                label="Business Name"
+                label="Business Name:"
                 placeholder="Enter Business Name"
                 v-model="business_name"
               ></fg-input>
@@ -21,7 +22,7 @@
             <div class="col-md-12">
               <fg-input
                 type="email"
-                label="Business Email"
+                label="Business Email:"
                 placeholder="Enter Business Email"
                 v-model="business_email"
               ></fg-input>
@@ -32,8 +33,8 @@
             <div class="col-md-12">
               <fg-input
                 type="text"
-                label="Business Address"
-                placeholder="Enter Business Address"
+                label="Business Address:"
+                placeholder="Enter Business Addresss"
                 v-model="business_address"
               ></fg-input>
               <span v-if="errors.business_address" class="error">{{ errors.business_address }}</span>
@@ -43,7 +44,7 @@
             <div class="col-md-12">
               <fg-input
                 type="text"
-                label="Business Phone Number"
+                label="Business Phone Number:"
                 placeholder="Enter Business Phone Number"
                 v-model="business_phone"
               ></fg-input>
@@ -54,7 +55,7 @@
             <div class="col-md-12">
               <fg-input
                 type="textarea"
-                label="Business Description"
+                label="Business Description:"
                 placeholder="Enter Business Description"
                 v-model="business_description"
               ></fg-input>
@@ -73,12 +74,12 @@
             ></multiselect>
           </div>
           <div class="text-center update-btn">
-            <p-button type="info" round @click.native.prevent="validateForm" class="btn-front">
+            <p-button type="info" round @click.native.prevent="validateForm">
               Update Profile
             </p-button>
           </div>
           <div class="text-center backto">
-            <button @click="redirectToLogin" class="back-to-dashboard-button">Back to Login</button>
+            <button @click="redirectToLogin" class="back-to-login-button">Back to Login</button>
           </div>
           <div class="clearfix"></div>
         </form>
@@ -88,7 +89,7 @@
           Business profile updated successfully!<br/>
           Click below to return to the login.
           <br/>
-          <button @click="redirectToDashboard" class="dashboard-button">Go to Login</button>
+          <button @click="redirectToDashboard" class="dashboard-button">Go to Dashboard</button>
         </div>
       </transition>
   </div>
@@ -172,6 +173,28 @@
   font-weight: bold;
   animation: fadeIn 0.5s ease-in-out;
 }
+
+.update-btn{margin-top:40px;}
+.update-btn button:hover{background-color:#093d58;}
+
+.heading-details{text-align: center; margin: 30px 0;}
+
+
+.back-to-login-button {
+  background-color: #8e44ad;
+  color: #ffffff;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding: 7px 12px;
+}
+
+
 
 #logo-updbn{max-width: 260px;}
 
@@ -260,8 +283,9 @@ export default {
         //localStorage.setItem("business_name", response.data.business.business_name);
 
         //this.$store.commit('updateUserBusinessName', response.data.business.business_name);
-        console.log(response.data.user)
         store.commit('setUser', response.data.user); 
+        store.commit('setSettings', response.data.user.settings);
+        store.commit('enableOnlineBooking', response.data.user.settings.enable_booking);
 
         this.loader = false;
         this.updateSuccess = true;
@@ -299,7 +323,7 @@ export default {
       });
     },
     redirectToDashboard() {
-      this.$router.push('/login');
+      this.$router.push('/dashboard');
     },
     redirectToLogin(){
       this.$router.push('/login');

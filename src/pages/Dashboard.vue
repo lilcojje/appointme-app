@@ -16,7 +16,7 @@
                 <td>{{ formatTime(appointment.appointment_time) }}</td>
                 <td>{{ appointment.client ? appointment.client.first_name : 'N/A' }}</td>
                 <td>{{ appointment.client ? appointment.client.last_name : 'N/A' }}</td>
-                <td><span :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
+                <td><span class="status" :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
                       {{ appointment.status }}
                     </span></td>
               </tr>
@@ -60,7 +60,7 @@
                 <td>{{ formatTime(appointment.appointment_time) }}</td>
                 <td>{{ appointment.client ? appointment.client.first_name : 'N/A' }}</td>
                 <td>{{ appointment.client ? appointment.client.last_name : 'N/A' }}</td>
-                <td><span :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
+                <td><span class="status" :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
                       {{ appointment.status }}
                     </span>
                 </td>
@@ -93,7 +93,7 @@
         <div class="card">
           <div class="card-body">
             <div class="row">
-              <div class="col-7">
+              <div class="col-7 num-info">
                 <div class="numbers">
                   <p>Clients</p>
                   {{ totalClients.toLocaleString() }}
@@ -111,7 +111,7 @@
         <div class="card">
           <div class="card-body">
             <div class="row">
-              <div class="col-7">
+              <div class="col-7 num-info">
                 <div class="numbers">
                   <p>Users</p>
                   {{ totalUsers.toLocaleString() }}
@@ -420,4 +420,12 @@ a.fc-event {
 .pagination-btn:hover:not(:disabled) {
   background-color: #0b4a70;
 }
+
+.status{display: inline-block;}
+
+@media screen and (max-width: 600px) {
+  .num-info{flex: 0 0 100%!important; max-width: 100%!important;}
+  .num-info .numbers{text-align: center!important;}
+}
+
 </style>

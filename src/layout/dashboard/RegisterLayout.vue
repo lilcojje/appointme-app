@@ -5,6 +5,7 @@
     </div>
     <div id="register-form" v-if="!registrationSuccess">
       <loader v-show="loader" />
+      <h3 class="heading-details">Personal Details</h3>
       <form @submit.prevent="validateForm">
         <div class="row">
           <div class="col-md-12">
@@ -63,7 +64,7 @@
             <span v-if="errors.confirm_password" class="error">{{ errors.confirm_password }}</span>
           </div>
         </div>
-        <div class="text-center update-btn">
+        <div class="text-center reg-btn">
           <p-button type="info" round @click.native.prevent="validateForm" class="btn-front">
             Register
           </p-button>
@@ -74,12 +75,12 @@
         <div class="clearfix"></div>
       </form>
     </div>
-    <transition name="fade">
+    <!-- <transition name="fade">
       <div v-if="registrationSuccess" class="success">
         Successfully registered!<br />Please click the login button.
         <br /><button @click="redirectToLogin" class="login-button">Login</button>
       </div>
-    </transition>
+    </transition> -->
   </div>
 </template>
 
@@ -113,7 +114,8 @@
 
 .error {
   color: #e74c3c;
-  font-size: 12px;
+  font-weight: bold;
+  font-size: 15px;
   margin-top: 5px;
   margin-bottom: 18px;
   display: inline-block;
@@ -167,6 +169,9 @@
   background-color: #732d91;
 }
 
+.reg-btn{margin-top:40px;}
+.reg-btn button{width: 32%;}
+.reg-btn button:hover{background-color:#093d58;}
 .update-btn,
 .backto {
   text-align: center;
@@ -186,6 +191,8 @@ input:focus {
   outline: none;
 }
 
+.heading-details{text-align: center; margin: 30px 0;}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -202,6 +209,7 @@ input:focus {
 import api from "@/static/config.json";
 import axios from "axios";
 import Loader from "@/components/Loader";
+import store from '@/store';
 
 export default {
   components: {
@@ -247,13 +255,16 @@ export default {
           notify_email: true,
         })
         .then((response) => {
+          // Access the token from response.data and commit it properly
+          store.commit('setAccessToken', response.data.access_token);
+          store.commit('setUser', response.data.user); 
           this.loader = false;
-          this.registrationSuccess = true;
           this.first_name = "";
           this.last_name = "";
           this.email = "";
           this.password = "";
           this.confirm_password = "";
+          this.$router.push("/update-business");
         })
         .catch((error) => {
           this.loader = false;
@@ -267,6 +278,7 @@ export default {
           }
         });
     },
+
     redirectToLogin() {
       this.$router.push("/login");
     },

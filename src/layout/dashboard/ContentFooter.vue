@@ -4,7 +4,13 @@
       <nav>
         <ul>
           <li>
-            <router-link :to="{ path: '/admin' }">Dashboard</router-link>
+            <router-link :to="{ path: '/dashboard' }">Dashboard</router-link>
+          </li>
+          <li>
+            <a href="https://appointme.tech/privacy" target="_blank">Privacy Policy</a>
+          </li>
+          <li>
+            <a href="https://appointme.tech/terms" target="_blank">Terms & Conditions</a>
           </li>
         </ul>
       </nav>

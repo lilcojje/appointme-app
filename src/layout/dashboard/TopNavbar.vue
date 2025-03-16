@@ -24,7 +24,7 @@
           id="user-dropdown"
         >
           <a class="dropdown-item" @click="profile">Profile</a>
-          <a class="dropdown-item" @click="viewForm">View Form</a>
+          <a class="dropdown-item" href="mailto:support@apppointme.tech">Support</a>
           <a class="dropdown-item" @click="logout">Logout</a>
         </drop-down>
     </div>
@@ -51,14 +51,7 @@ export default {
       return this.$store.state.settings;
     },
     enableBooking() {
-      const plainSettings = JSON.parse(JSON.stringify(this.settings));
-
-      const enableBookingValue = plainSettings.enable_booking;
-
-      return enableBookingValue == 1 ? true : false;
-      // const setting = plainSettings.find(item => item.key === 'enable_booking');
-      // // Convert the value "1" to boolean true, otherwise return false
-      // return setting ? setting.value == "1" : false;
+      return this.$store.state.enableBooking;
     }
   },
   data() {
@@ -117,7 +110,6 @@ export default {
   },
   created(){
     this.fullname = this.user.first_name + ' ' + this.user.last_name;
-    console.log(this.enableBooking);
   }
 };
 

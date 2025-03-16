@@ -206,7 +206,8 @@ export default {
       specificDate: null, // For Daily Appointment Schedule
       reportData: null, // Data returned from the API
     };
-  },computed: {
+  },
+  computed: {
     user() {
       return this.$store.state.user;
     },
@@ -262,8 +263,6 @@ export default {
 </script>
 
 <style scoped>
-
-
 .back-home {
   margin-bottom: 20px;
   background: #106c9c;
@@ -278,6 +277,7 @@ export default {
 select#report_type {
   padding: 10px;
   margin-right: 10px;
+  width: auto;
 }
 .filter-group {
   margin: 15px 0;
@@ -327,6 +327,42 @@ table td {
   padding: 15px;
 }
 
-.report-content{padding: 0 40px 30px;}
-.report-data{padding: 28px;}
+.report-content {
+  padding: 0 40px 30px;
+}
+.report-data {
+  padding: 28px;
+}
+
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+  #page-report .mx-datepicker{width: 100%!important;}
+  .report-content {
+    padding: 0 20px 20px;
+  }
+  .report-data {
+    padding: 15px;
+  }
+  select#report_type {
+    width: 100%;
+    margin: 0 0 10px 0;
+  }
+  .filter-group {
+    padding: 0 15px;
+  }
+  button {
+    margin: 10px 0 0 0;
+    width: 100%;
+  }
+  .back-home {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+  }
+  table thead th,
+  table td {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
 </style>

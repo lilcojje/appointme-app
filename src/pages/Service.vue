@@ -620,6 +620,7 @@ export default {
   font-weight: bold;
   font-size: 20px;
 }
+
 @media screen and (max-width: 600px) {
   .modal {
     width: 100% !important;

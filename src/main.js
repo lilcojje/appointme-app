@@ -22,10 +22,19 @@ import "vue-notifyjs/themes/default.css";
 
 import firebaseMessaging from './firebase';
 import store from './store';  
+import GAuth from "vue-google-oauth2";
 
 Vue.config.productionTip = false;
 
 Vue.use(PaperDashboard);
+
+const gauthOption = {
+  clientId: "982363249873-dmq6of1ubi3lgvkmhllqdslqfbmi2eov.apps.googleusercontent.com",
+  scope: "profile email",
+  prompt: "select_account"
+};
+
+Vue.use(GAuth, gauthOption);
 
 /* eslint-disable no-new */
 new Vue({

@@ -71,7 +71,7 @@
                   <td>{{ appointment.appointment_time }}</td>
                   <td>{{ appointment.formated_service }}</td>
                   <td>
-                    <span :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
+                    <span class="status" :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
                       {{ appointment.status }}
                     </span>
                   </td>
@@ -380,15 +380,13 @@ export default {
     async list(page = 1) {
       let self = this;
       let limit = 10;
-      if (self.view_list) {
-        self.view_list = true;
-        self.calendar_list = false;
-      } else {
-        self.view_list = false;
-        self.calendar_list = true;
-      }
-
-    
+      // if (self.view_list) {
+      //   self.view_list = true;
+      //   self.calendar_list = false;
+      // } else {
+      //   self.view_list = false;
+      //   self.calendar_list = true;
+      // }
 
       const range_data = this.date_range;
       if (this.date_range !== "") {
@@ -1190,6 +1188,8 @@ export default {
     }
   },
   created() {
+    this.select_view = 'list';
+    this.view_list = true;
     this.list();
     this.client_name = localStorage.getItem("client_name");
     this.info.client_id = this.$route.params.id;
@@ -1347,4 +1347,6 @@ a.fc-event {
   display: inline-block !important;
   margin-right: 7px;}
 .action .btn-info{margin: 0 2px; padding: 4px 9px;}
+
+.status{display: inline-block;}
 </style>

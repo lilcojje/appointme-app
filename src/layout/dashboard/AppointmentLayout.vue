@@ -247,7 +247,7 @@
       </transition>
 
       </div>
-      <div style="clear:both">&nbsp;<</div>
+      <div style="clear:both">&nbsp;</div>
     </transition>
   </div>
 </template>
@@ -347,7 +347,15 @@ export default {
           this.businessProfile = response.data;
           const timeTypeSetting = this.businessProfile.setting.find(item => item.key === 'time_type');
           const timeTypeValue = timeTypeSetting ? timeTypeSetting.value : null;
+
+          const enable_booking = this.businessProfile.setting.find(item => item.key === 'enable_booking');
+          const enable_booking_val = enable_booking ? enable_booking.value : null;
           this.time_type = timeTypeValue;
+
+          if(enable_booking_val=='0'){
+            this.$router.push("/login");
+          }
+
         })
         .catch(error => {
           console.error("Error fetching business profile:", error);
@@ -1083,7 +1091,7 @@ export default {
   .appointment-form,
   #choose {
     padding: 15px;
-    width: 90%;
+    width: 90%!important;
   }
   #logo {
     width: 60%;

@@ -1,7 +1,7 @@
 <template>
   <ul class="nav navbar-nav nav-mobile-menu">
     <h5 id="fullname" @click="profile"><span class="ti-user"></span>{{ fullname }}</h5>
-    <h5 @click="viewForm" id="viewForm"><span class="ti-eye" ></span>View Form</h5>
+    <h5 @click="viewForm" id="viewForm"><span class="ti-eye" v-if="enableBooking"></span>View Form</h5>
     <slot></slot>
   </ul>
 </template>
@@ -13,11 +13,19 @@ export default {
       fullname: '',
     };
   },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    enableBooking() {
+      return this.$store.state.enableBooking;
+    }
+  },
   methods: {
     viewForm() {
-      const business_id = localStorage.getItem("business_id");
+     
       // Resolve the URL using Vue Router (optional but recommended for proper routing)
-      const url = this.$router.resolve({ path: '/book/' + business_id }).href;
+      const url = this.$router.resolve({ path: '/book/' + this.user.business_id }).href;
       window.open(url, '_blank');
       this.$sidebar.displaySidebar(!this.$sidebar.showSidebar);
     },
@@ -28,7 +36,7 @@ export default {
     },
   },
   created(){
-    this.fullname = localStorage.getItem('fullname');
+    this.fullname = this.user.first_name + ' ' + this.user.last_name;
   }
 };
 </script>

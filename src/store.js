@@ -10,7 +10,8 @@ const getDefaultState = () => {
     user: null,
     permissions: [],
     token: null,
-    settings: {}
+    settings: {},
+    enableBooking: null
   };
 };
 
@@ -35,6 +36,9 @@ export default new Vuex.Store({
     },
     updateUserBusinessName(state, newName) {
       state.user.business_name = newName;
+    },
+    enableOnlineBooking(state, status) {
+      state.enableBooking = status;
     }
   },
   actions: {

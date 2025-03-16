@@ -33,6 +33,7 @@
             </div>
           </div>
           <p v-if="generalError" class="error-text">{{ generalError }}</p>
+
           <div class="forget-pass-wrap">
               <a href="/forget">Forget Password?</a>
           </div>
@@ -44,6 +45,19 @@
               Register
             </p-button>
           </div>
+
+          <div class="row">
+            <div class="col-md-12 password-field">
+              <div id="g_id_onload"
+                data-client_id="982363249873-dmq6of1ubi3lgvkmhllqdslqfbmi2eov.apps.googleusercontent.com"
+                data-callback="handleCredentialResponse"
+                data-auto_prompt="false">
+              </div>
+
+              <div class="g_id_signin" data-type="standard"></div>
+            </div>
+          </div>
+          
           <div class="clearfix"></div>
         </form>
       </div>
@@ -155,6 +169,8 @@
   margin-bottom: 20px;
 }
 
+.g_id_signin{margin-top: 20px;}
+
 /* Responsive design adjustments */
 @media (max-width: 480px) {
   #login-form {
@@ -164,6 +180,16 @@
 
  
 }
+
+.google-btn {
+  background-color: #db4437;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
 </style>
 
 
@@ -216,6 +242,7 @@ export default {
         store.commit('setUser', data.user); 
         store.commit('setAccessToken', data.access_token);
         store.commit('setSettings', data.user.settings);
+        store.commit('enableOnlineBooking', data.user.settings.enable_booking);
         
         if (data.user.business_id === null) {
           this.$router.push('/update-business');
@@ -241,9 +268,38 @@ export default {
     },
     togglePasswordVisibility() {
       this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
-    }
+    },
+    async handleCredentialResponse(response) {
+      console.log("Google Credential Response:", response);
+
+      // Send the response token to Laravel backend
+      const res = await fetch(api.API_URL + "/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: response.credential }),
+      });
+
+      const data = await res.json();
+
+      // Store JWT token in local storage
+
+      store.commit('setAccessToken', data.access_token);
+      store.commit('setUser', data.user); 
+      store.commit('setSettings', data.user.settings);
+      store.commit('enableOnlineBooking', data.user.settings.enable_booking);
+      
+      // Redirect user to dashboard
+      if (!data.user.business_id) {
+          this.$router.push('/update-business');
+        } else {
+          this.$router.push({ name: 'dashboard' });
+        }
+      
+    },
   },
   async mounted() {
+    window.handleCredentialResponse = this.handleCredentialResponse;
+    
     if (Capacitor.isNativePlatform()) {
       let permStatus = await PushNotifications.checkPermissions();
       if (permStatus.receive === 'prompt') {

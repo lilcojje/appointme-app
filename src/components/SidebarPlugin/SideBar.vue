@@ -12,7 +12,7 @@
                  otherwise, the default image is shown -->
             <img :src="businessLogo" alt="Business Logo" />
           </div>
-          {{ user.business_name }}
+          {{ business_name }}
         </a>
       </div>
       <slot> </slot>

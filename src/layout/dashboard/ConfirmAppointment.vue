@@ -42,15 +42,23 @@
         errors: {}
       };
     },
+    computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
+  },
     methods: {
         confirmAppointment() {
             this.loader = true;
             // Post to the endpoint using businessId and include appointment id in the payload, with authorization token in the header
-            axios.post(`${api.API_URL}/confirm-appointment/${this.businessId}`, {
+            axios.post(`${api.API_URL}/confirm-appointment/${this.user.business_id}`, {
                 appointment: this.appointment,
                 confirm: 1
             }, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                headers: { Authorization: `Bearer ${this.token}` }
             })
             .then(response => {
                 this.loader = false;
