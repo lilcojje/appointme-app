@@ -208,6 +208,14 @@ export default {
       add_btn:true,
     }
   },
+  computed:{
+    user() {
+      return this.$store.state.user;
+    },
+    token() {
+      return this.$store.state.token;
+    }
+  },
   methods:{
     async list(page=1){
            let self = this;

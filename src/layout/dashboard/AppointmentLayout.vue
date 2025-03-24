@@ -141,15 +141,7 @@
                   <div v-if="choose_found || view_new || isRebook">
                     <div class="form-group">
                       <label class="control-label">Date</label>
-                      <input
-                        type="date"
-                        v-model="info.date"
-                
-                        @change="changeDate"
-                        placeholder="Enter Date"
-                        class="form-control"
-                        :min="minDate"
-                      />
+                      <fg-input type="date" placeholder="Date" v-model="info.date" @change.native="changeDate" :min="minDate" />
                     </div>
                     <div class="form-group" v-if="time_type=='auto'">
                       <label class="control-label">Select Time</label>
@@ -576,21 +568,37 @@ export default {
             )
             .then((response) => {
               self.loader_save = false;
-              if (response.data && response.data.appointment_id) {
-                self.appointment_id = response.data.appointment_id;
-              }
-              
-              self.appointment_info = {
-                appointment_id: self.appointment_id,
-                date: self.info.date,
-                time: self.info.time,
-                services: self.selectedService.map((s) => s.name)
-              };
-              self.success_show = true;
-              if (typeof self.list === "function") self.list();
-              if (typeof self.closeModalAppointment === "function") self.closeModalAppointment();
 
-              self.resetForm();
+              if (response.data.error) {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Appointment Limit Reached',
+                      text: `Please contact ${this.businessProfile.business_name} regarding this technical issue.`,
+                      showCancelButton: true,
+                      confirmButtonText: 'Ok',
+                      cancelButtonText: 'Close'
+                  }).then((result) => {
+                     
+                  });
+              }else{
+
+                 if (response.data && response.data.appointment_id) {
+                    self.appointment_id = response.data.appointment_id;
+                  }
+                  
+                  self.appointment_info = {
+                    appointment_id: self.appointment_id,
+                    date: self.info.date,
+                    time: self.info.time,
+                    services: self.selectedService.map((s) => s.name)
+                  };
+                  self.success_show = true;
+                  if (typeof self.list === "function") self.list();
+                  if (typeof self.closeModalAppointment === "function") self.closeModalAppointment();
+
+                  self.resetForm();
+              } 
+
               self.add_btn = true;
             })
             .catch((error) => {

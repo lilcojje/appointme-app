@@ -38,12 +38,20 @@
           icon="ti-user"
           v-if="hasPermission('view_users')"
         />
-        <!--
+        
         <sidebar-link
           to="/transactions"
           name="Transactions"
           icon="ti-layout-list-post"
+          v-if="hasPermission('view_transactions')"
         />
+        <sidebar-link
+          to="/subscription"
+          name="Subscription"
+          icon="ti-package"
+          v-if="user.owner==1"
+        />
+        <!--
         <sidebar-link
           to="/expenses"
           name="Expenses"
@@ -83,7 +91,9 @@
     </div>
   </div>
 </template>
-<style lang="scss"></style>
+<style lang="scss">
+.wrapper .sidebar .nav .nav-item .nav-link{margin: 7px 0px!important;}
+</style>
 <script>
 import axios from 'axios'
 import api  from "@/static/config.json";

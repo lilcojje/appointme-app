@@ -37,8 +37,9 @@ import ForgotLayout from "@/layout/dashboard/ForgotLayout.vue";
 import ResetLayout from "@/layout/dashboard/ResetLayout.vue";
 import TodaysAppointment from "@/layout/dashboard/TodaysAppointment.vue";
 import ConfirmAppointment from "@/layout/dashboard/ConfirmAppointment.vue";
-
-
+import SubscriptionLayout from "@/layout/dashboard/SubscriptionLayout.vue";
+import CheckoutLayout from "@/layout/dashboard/CheckoutLayout.vue";
+import PaypalSuccess from "@/layout/dashboard/PaypalSuccess.vue";
 
 const routes = [
   {
@@ -136,7 +137,7 @@ const routes = [
         name: "transactions",
         component: Transactions,
         meta: {
-          requiresAuth: true 
+          requiredPermission: "view_transactions"
         }
       },{
         path: "dtr",
@@ -169,8 +170,6 @@ const routes = [
           requiredPermission: "view_settings"
         }
       }
-      
-      
       ,{
         path: "expenses",
         name: "expenses",
@@ -227,6 +226,22 @@ const routes = [
     name: "update business",
     component: UpdateBusiness,
   },
+  {
+    path: "/subscription",
+    name: "subscription",
+    component: SubscriptionLayout,
+  },
+  {
+    path: "/checkout/:id",
+    name: "checkout",
+    component: CheckoutLayout,
+  },
+  {
+    path: "/paypal-success",
+    name: "checkout",
+    component: PaypalSuccess,
+  },
+  
   { path: "*", name: "not-found", component: NotFound },
 ];
 

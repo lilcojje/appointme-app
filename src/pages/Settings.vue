@@ -79,10 +79,25 @@
           :custom-label="timeZonesLabel"
           placeholder="Search timezone"
           track-by="id"
-          label="first_name"
+          label="timezone"
         ></multiselect>
         <p class="item-description">
           Choose your local time zone to ensure correct scheduling for bookings and time-based functionalities.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label>Currency:</label>
+        <multiselect
+          v-model="settings.currency_code"
+          :options="currencyList"
+          :custom-label="currencyLabel"
+          placeholder="Search Currency"
+          track-by="currency_code"
+          label="currency_code"
+        ></multiselect>
+        <p class="item-description">
+          Select the currency to be used for transactions and pricing display.
         </p>
       </div>
       <button @click="updateSettings">Save Settings</button>
@@ -139,12 +154,14 @@ export default {
       settings: {
         enable_booking: false,
         time_zone: "",
+        currency_code: "",
         number_of_slots: "",
         slot_duration: "",
         time_type:""
       },
       IMG_URL: '',
       timeZones: [],
+      currencyList: [],
       businessProfile: {  
         business_name: "",
         business_email: "",
@@ -155,7 +172,7 @@ export default {
       },
       enable_booking_btn: false,
       logoFile: null,
-      loader_save: false
+      loader_save: false,
     };
   },
   computed:{
@@ -170,6 +187,7 @@ export default {
     }
   },
   created() {
+    this.fetchCurrencies();
     this.fetchSettings();
     this.fetchTimeZones();
     this.fetchBusinessProfile();
@@ -187,22 +205,29 @@ export default {
         .then(response => {
           const data = response.data;
           data.enable_booking = !!Number(data.enable_booking);
+          data.currency_code = this.currencyList.find(
+              currency => currency.code === data.currency_code
+            );
           this.settings = response.data;
         });
     },
     updateSettings() {
       this.loader_save = true;
+      let self = this;
       const payload = { 
         ...this.settings,
-        business_id: this.user.business_id
+        business_id: self.user.business_id,
+        user_id: self.user.id
       };
       axios
         .post(api.API_URL + "/settings", payload, {
           headers: { Authorization: `Bearer ${this.token}` }
         })
-        .then(() => {
+        .then(response => {
           this.loader_save = false;
           store.commit('enableOnlineBooking', this.settings.enable_booking==true ? 1 : 0);
+          store.commit('setUser', response.data.user); 
+          store.commit('setSettings', response.data.user.settings);
           this.notifyVue("top", "center", "success", "Settings updated successfully", "ti-announcement");
         });
     },
@@ -224,6 +249,17 @@ export default {
       })
       .then(response => {
         this.timeZones = response.data.timezones;
+      }).catch(error => {
+        console.error("Error fetching time zones:", error);
+      });
+    },
+    fetchCurrencies() {
+      axios.get(api.API_URL + "/currencies",
+      {
+       headers: { Authorization: `Bearer ${this.token}` }
+      })
+      .then(response => {
+        this.currencyList = response.data;
       }).catch(error => {
         console.error("Error fetching time zones:", error);
       });
@@ -296,6 +332,9 @@ export default {
     },
     timeZonesLabel(time) {
       return `${time}`;
+    },
+    currencyLabel(currency) {
+      return `${currency.code} (${currency.symbol})`;
     },
     enable_book_btn(value){
        // Update the local flag for showing the booking link container

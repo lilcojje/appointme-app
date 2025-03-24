@@ -8,7 +8,7 @@
               <div class="col-6">
                 <input type="text" v-model="search_value" @input="search" id="search" />
               </div>
-              <div class="col-6">
+              <div class="col-6 align-right">
                 <p-button type="info" round @click.native.prevent="modalAddService" id="add-service" v-show="user.permissions.includes('add_services')">
                   Add Services
                 </p-button>
@@ -28,7 +28,7 @@
               <tbody v-if="services.total > 0">
                 <tr v-for="(service,index) in services.data" :key="index">
                   <td style="text-align: center;">{{ service.name }}</td>
-                  <td style="text-align: center;">{{ service.price }}</td>
+                  <td style="text-align: center;">{{currency_label}}{{ service.price }}</td>
                   <td style="text-align: center;">
                     {{ service.service_category ? service.service_category.name : 'N/A' }}
                   </td>
@@ -48,6 +48,7 @@
                 </tr>
               </tbody>
             </table>
+            <div class="total_records">Total Records: {{total}}</div>
             <paginate
               :page-count="total_page"
               :page-range="1"
@@ -119,6 +120,9 @@
       >
         Update
       </p-button>
+      <p-button type="info" round @click.native.prevent="cancel()" id="cancel">
+            Cancel
+       </p-button> 
       <div style="clear:both;">&nbsp;</div>
     </Modal>
   </div>
@@ -176,6 +180,8 @@ export default {
         service_name: "",
         price: "",
       },
+      currency_label: '',
+      total: 0
     };
   },computed: {
     user() {
@@ -183,6 +189,10 @@ export default {
     },
     token() {
       return this.$store.state.token;
+    },
+    settings() {
+      // Ensure it's an array
+      return this.$store.state.settings;
     }
   },
   methods: {
@@ -205,6 +215,7 @@ export default {
         .then(({ data }) => {
           self.loader = false;
           self.services = data;
+          self.total = data.total;
           self.total_page = Math.ceil(data.total / limit);
         })
         .catch(({ response }) => {
@@ -280,27 +291,42 @@ export default {
             description: self.info.description,
             price: self.info.price,
             category_id: self.info.category_id,
-            business_id: this.user.business_id,
+            business_id: self.user.business_id,
           },
           {
             headers: { Authorization: `Bearer ${this.token}` },
           }
         )
-        .then((data) => {
+        .then((response) => {
           self.loader_save = false;
-          self.notifyVue(
-            "top",
-            "center",
-            "success",
-            "Service Successfully Added",
-            "ti-announcement"
-          );
-          self.list();
-          self.closeModalService();
-          self.info.first_name = "";
-          self.info.last_name = "";
-          self.info.contact_number = "";
-          self.add_btn = true;
+          if (response.data.error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Limit Reached',
+                    text: 'Adding Services has reached the limit. Please upgrade to Pro.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Subscribe',
+                    cancelButtonText: 'Close'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.$router.push('/subscription')
+                    }
+                });
+            } else {
+              self.notifyVue(
+                "top",
+                "center",
+                "success",
+                "Service Successfully Added",
+                "ti-announcement"
+              );
+              self.list();
+              self.closeModalService();
+              self.info.service_name = "";
+              self.info.description = "";
+              self.info.price = "";
+              self.info.category_id = "";
+            }
         })
         .catch((error) => {
           try {
@@ -351,9 +377,11 @@ export default {
         .put(
           api.API_URL + "/service/" + self.info.id,
           {
-            first_name: self.info.first_name,
-            last_name: self.info.last_name,
-            contact_number: self.info.contact_number,
+            name: self.info.service_name,
+            description: self.info.description,
+            price: self.info.price,
+            category_id: self.info.category_id,
+            business_id: self.user.business_id,
           },
           {
             headers: { Authorization: `Bearer ${this.token}` },
@@ -370,9 +398,11 @@ export default {
           );
           self.list();
           self.closeModalService();
-          self.info.first_name = "";
-          self.info.last_name = "";
-          self.info.contact_number = "";
+          self.info.service_name = "";
+          self.info.description = "";
+          self.info.price = "";
+          self.info.category_id = "";
+          self.user.business_id = "";
         })
         .catch((error) => {
           try {
@@ -573,15 +603,24 @@ export default {
         console.error("Error fetching categories", error);
       }
     },
+      cancel(){
+        this.closeModalService();
+        this.info.service_name = "";
+        this.info.description = "";
+        this.info.price = "";
+        this.info.category_id = "";
+      }
   },
   created() {
     this.list();
     this.fetchCategories();
+    const plainSettings = JSON.parse(JSON.stringify(this.settings));
+    this.currency_label = plainSettings.currency_symbol;
   },
 };
 </script>
 
-<style>
+<style scoped>
 #service-tbl .btn {
   padding: 5px 10px !important;
   margin-right: 5px;

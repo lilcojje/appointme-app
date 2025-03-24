@@ -48,6 +48,7 @@
                 </tr>
               </tbody>
             </table>
+            <div class="total_records">Total Records: {{total}}</div>
             <paginate
               :page-count="total_page"
               :page-range="1"
@@ -113,6 +114,9 @@
       <p-button type="info" round @click.native.prevent="updateUser" id="update-user" v-show="btn_type == 'edit'">
         Update
       </p-button>
+      <p-button type="info" round @click.native.prevent="cancel()" id="cancel">
+                      Cancel
+                </p-button> 
       <div style="clear:both;">&nbsp;</div>
     </Modal>
 
@@ -161,7 +165,8 @@ export default {
         email: '',
         password: ''
       },
-      disable_role: false
+      disable_role: false,
+      total:0
     };
   },computed: {
     userData() {
@@ -187,6 +192,7 @@ export default {
       ).then(({ data }) => {
         self.loader = false;
         self.users = data;
+        self.total = data.total;
         self.total_page = Math.ceil(data.total / limit);
       }).catch(({ response }) => {
         if (response.data.error.code === 'token_could_not_verified') {
@@ -258,25 +264,50 @@ export default {
       {
         headers: { Authorization: `Bearer ${this.token}` }
       })
-        .then(() => {
+        .then((response) => {
           self.loader_save = false;
-          self.notifyVue('top', 'center', 'success', 'User successfully added', 'ti-announcement');
-          self.list();
-          self.closeModalUser();
-          self.resetForm();
+          if (response.data.error) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Limit Reached',
+              text: 'Adding Services has reached the limit. Please upgrade to Pro.',
+              showCancelButton: true,
+              confirmButtonText: 'Subscribe',
+              cancelButtonText: 'Close'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this.$router.push('/subscription');
+              }
+            });
+          } else {
+            self.notifyVue('top', 'center', 'success', 'User successfully added', 'ti-announcement');
+            self.list();
+            self.closeModalUser();
+            self.resetForm();
+          }
           self.add_btn = true;
         })
         .catch((error) => {
-          self.loader_save = false;
-          if (error.response.status === 400) {
-            if (error.response.data.errors && error.response.data.errors.role_id) {
-              this.notifyVue('top', 'center', 'danger', error.response.data.errors.role_id[0], 'ti-hand-stop');
-            } else {
-              alert(error.response.data.error.message);
-              this.notifyVue('top', 'center', 'danger', error.response.data.error.message, 'ti-hand-stop');
+            self.loader_save = false;
+            
+            // Get the main error message or fallback if not available
+            let errMsg = error.response && error.response.data && error.response.data.message 
+                        ? error.response.data.message 
+                        : 'An error occurred. Please try again.';
+
+            // If there are email errors, append them only if they differ from the main message
+            if (error.response && error.response.data && error.response.data.errors && error.response.data.errors.email) {
+              const emailErrors = error.response.data.errors.email;
+              const additionalErrors = emailErrors.filter(msg => msg !== errMsg);
+              if (additionalErrors.length) {
+                errMsg += " " + additionalErrors.join(" ");
+              }
             }
-          }
-        });
+
+            this.notifyVue('top', 'center', 'danger', errMsg, 'ti-hand-stop');
+            self.add_btn = true;
+          });
+
     },
 
     updateUser() {
@@ -344,6 +375,7 @@ export default {
               .then(() => {
                   self.loader_save = false;
                   Swal.fire("Deleted!", "User successfully deleted.", "success");
+
                   self.list();
               })
               .catch((error) => {
@@ -419,6 +451,10 @@ export default {
         console.error("Error fetching roles:", error);
       }
     },
+    cancel(){
+        this.closeModalUser();
+        this.resetForm();
+      }
   },
   created() {
     this.list();

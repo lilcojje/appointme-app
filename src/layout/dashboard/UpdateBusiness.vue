@@ -73,6 +73,17 @@
               label="first_name"
             ></multiselect>
           </div>
+          <div class="form-group">
+            <label>Currency:</label>
+            <multiselect
+              v-model="settings.currency_code"
+              :options="currencyList"
+              :custom-label="currencyLabel"
+              placeholder="Search Currency"
+              track-by="currency_code"
+              label="currency_code"
+            ></multiselect>
+          </div>
           <div class="text-center update-btn">
             <p-button type="info" round @click.native.prevent="validateForm">
               Update Profile
@@ -242,8 +253,10 @@ export default {
       timeZones: [],
       settings: {
         time_zone: null,
+        currency_code:'',
       },
-      isLoadingTimeZones: false
+      isLoadingTimeZones: false,
+      currencyList:[]
     };
   },computed: {
     user() {
@@ -276,7 +289,8 @@ export default {
           business_address: this.business_address,
           business_phone: this.business_phone,
           business_description: this.business_description,
-          time_zone: this.settings.time_zone
+          time_zone: this.settings.time_zone,
+          currency_code: this.settings.currency_code
       })
       .then(response => {
        // localStorage.setItem("business_id", response.data.business.id);
@@ -288,7 +302,8 @@ export default {
         store.commit('enableOnlineBooking', response.data.user.settings.enable_booking);
 
         this.loader = false;
-        this.updateSuccess = true;
+        //this.updateSuccess = true;
+        this.$router.push('/subscription');
       }).catch(error => {
         this.loader = false;
         if (error.response && error.response.data) {
@@ -322,6 +337,17 @@ export default {
         this.isLoadingTimeZones = false;
       });
     },
+    fetchCurrencies() {
+      axios.get(api.API_URL + "/currencies",
+      {
+       headers: { Authorization: `Bearer ${this.token}` }
+      })
+      .then(response => {
+        this.currencyList = response.data;
+      }).catch(error => {
+        console.error("Error fetching time zones:", error);
+      });
+    },
     redirectToDashboard() {
       this.$router.push('/dashboard');
     },
@@ -331,6 +357,9 @@ export default {
     timeZonesLabel(time) {
       return `${time}`;
     },
+    currencyLabel(currency) {
+      return `${currency.code} (${currency.symbol})`;
+    },
   },
   created() {
 
@@ -339,6 +368,7 @@ export default {
     }
     
     this.fetchTimeZones();
+    this.fetchCurrencies();
     if (!this.user.id) {
       this.redirectToLogin();
     }

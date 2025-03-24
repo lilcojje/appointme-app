@@ -50,6 +50,7 @@
                 </tr>
               </tbody>
             </table>
+            <div class="total_records">Total Records: {{total}}</div>
             <paginate
               :page-count="total_page"
               :page-range="1"
@@ -98,6 +99,9 @@
       <p-button type="info" round @click.native.prevent="updateClient" id="add-client" v-show="btn_type == 'edit'">
         Update
       </p-button>  
+      <p-button type="info" round @click.native.prevent="cancel()" id="cancel">
+            Cancel
+       </p-button> 
       <div style="clear:both;">&nbsp;</div>
     </Modal>
   </div>
@@ -150,7 +154,8 @@ export default {
       items: [],
       template: ItemTemplate,
       role:'',
-      business_id: ''
+      business_id: '',
+      total: 0
     }
   },
   computed: {
@@ -177,6 +182,7 @@ export default {
         self.loader = false;
         self.clients = data
         self.total_page = Math.ceil(data.total/limit);
+        self.total = data.total;
       }).catch(({ response })=>{
         if(response.data.error.code =='token_could_not_verified'){
           this.$router.push('/login')
@@ -228,50 +234,70 @@ export default {
       return true;
     },
 
-    addClient(){
-      if (!this.validateForm()) return;
+    addClient() {
+        if (!this.validateForm()) return;
 
-      this.loader_save = true;
-      let self = this;
-      this.add_btn = false;
-      axios.post(api.API_URL+'/client/store', {
-        first_name: self.info.first_name,
-        last_name: self.info.last_name,
-        email: self.info.email,             // Send email in the payload
-        contact_number: self.info.contact_number,
-        business_id : self.user.business_id
-      },
-      {
-        headers: { Authorization: `Bearer ${this.token}` }
-      }
-      )
-      .then((data) => {
-        self.loader_save = false;
-        self.notifyVue('top', 'center','success','Client Successfully Added','ti-announcement')
-        self.list();
-        self.closeModalClient()
-        self.info.first_name = ''
-        self.info.last_name = ''
-        self.info.email = ''              // Clear email field
-        self.info.contact_number = ''
-        self.add_btn = true;
-      })
-      .catch((error) => {
-        try {
-          self.loader_save = false;
-          if(error.response.status==400){
-            alert(error.response.data.error.message)
-            this.notifyVue('top', 'center','danger',error.response.data.error.message,'ti-hand-stop')
-          } else if(error.response.status==422){
-            for (const [key, value] of Object.entries(error.response.data)) {
-              this.notifyVue('top', 'center','danger',value,'ti-hand-stop')
+        this.loader_save = true;
+        let self = this;
+        this.add_btn = false;
+
+        axios.post(api.API_URL + '/client/store', {
+            first_name: self.info.first_name,
+            last_name: self.info.last_name,
+            email: self.info.email,             
+            contact_number: self.info.contact_number,
+            business_id: self.user.business_id
+        },
+        {
+            headers: { Authorization: `Bearer ${this.token}` }
+        })
+        .then((response) => {
+            self.loader_save = false;
+            if (response.data.error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Limit Reached',
+                    text: 'Adding client has reached the limit. Please upgrade to Pro.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Subscribe',
+                    cancelButtonText: 'Close'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.$router.push('/subscription')
+                    }
+                });
+            } else {
+                self.notifyVue('top', 'center', 'success', 'Client Successfully Added', 'ti-announcement');
+                self.list();
+                self.closeModalClient();
+                self.info.first_name = '';
+                self.info.last_name = '';
+                self.info.email = '';
+                self.info.contact_number = '';
             }
-            this.add_btn = true;  
-          }
-        }
-        catch(err) {}
-      });
+            self.add_btn = true;
+        })
+        .catch((error) => {
+            self.loader_save = false;
+            try {
+                if (error.response.status == 400) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.response.data.error.message
+                    });
+                } else if (error.response.status == 422) {
+                    for (const [key, value] of Object.entries(error.response.data)) {
+                        self.notifyVue('top', 'center', 'danger', value, 'ti-hand-stop');
+                    }
+                }
+            } catch (err) {
+                console.error("An error occurred:", err);
+            }
+            self.add_btn = true;
+        });
     },
+
     updateClient(){
       if (!this.validateForm()) return;
     
@@ -437,7 +463,14 @@ export default {
         }
       });
 
-    }
+    },
+      cancel(){
+        this.closeModalClient();
+        this.info.first_name = '';
+        this.info.last_name = '';
+        this.info.email = '';
+        this.info.contact_number = '';
+      }
   },
   created() {
     this.list();
@@ -487,6 +520,9 @@ export default {
   font-weight: bold; 
   font-size: 20px;
 }
+
+.total_records{text-align: center;  width: 100%; padding: 10px;}
+
 @media screen and (max-width: 600px) {
   .modal {
     width: 100%!important;

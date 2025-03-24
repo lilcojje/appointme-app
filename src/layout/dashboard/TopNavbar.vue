@@ -16,6 +16,7 @@
       <div class="collapse navbar-collapse">
       </div>
       <a class="nav-link" id="view-form" @click="viewForm" v-if="enableBooking"><span class="ti-eye"></span>View Form</a>
+      <a class="nav-link-sub" @click="subscription" id="sub-link" ><span  v-if="user.subscription.plan=='free'" class="subsc">Upgrade Pro</span><span class="subsc" v-else>(PRO)</span></a>
       <drop-down
           class="nav-item"
           :title="fullname"
@@ -24,6 +25,7 @@
           id="user-dropdown"
         >
           <a class="dropdown-item" @click="profile">Profile</a>
+          <a class="dropdown-item" @click="subscription" v-if="user.owner==1">Subscription</a>
           <a class="dropdown-item" href="mailto:support@apppointme.tech">Support</a>
           <a class="dropdown-item" @click="logout">Logout</a>
         </drop-down>
@@ -100,6 +102,9 @@ export default {
       // Redirect to the '/profile' route
       this.$router.replace('/profile');
     },
+    subscription(){
+      this.$router.replace('/subscription');
+    },
     viewForm() {
       const business_id = this.user.business_id;
       // Resolve the URL using Vue Router (optional but recommended for proper routing)
@@ -109,7 +114,7 @@ export default {
    
   },
   created(){
-    this.fullname = this.user.first_name + ' ' + this.user.last_name;
+    this.fullname = this.user.first_name + ' ' ;
   }
 };
 
@@ -122,11 +127,16 @@ export default {
   font-weight: bold;
   cursor: pointer;
 }
+.subsc{text-transform: uppercase; cursor: pointer; font-weight: bold;}
 
 #view-form span{margin-right: 5px;}
 
 @media only screen and (max-width: 767px) {
   #view-form {
+    display: none;
+  }
+  
+  #sub-link{
     display: none;
   }
 }

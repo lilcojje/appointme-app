@@ -19,7 +19,7 @@ export default new Vuex.Store({
   state: getDefaultState(),
   mutations: {
     setUser(state, user) {
-      state.user = user;
+      state.user = user || [];
       // Extract permission names from the user's permissions
       state.permissions = user.permissions || [];
 

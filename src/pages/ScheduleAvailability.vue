@@ -103,6 +103,9 @@
         <p-button type="info" id="add-schedule" round @click.native.prevent="updateSchedule" v-show="btn_type == 'edit'">
           Update
         </p-button>
+        <p-button type="info" round @click.native.prevent="cancelSched()" id="cancel">
+            Cancel
+        </p-button> 
       </Modal>
     </div>
 
@@ -193,6 +196,9 @@
         <p-button type="info" id="update-blocked-date" round @click.native.prevent="updateBlockedDate" v-show="blockedBtnType == 'edit'">
           Update
         </p-button>
+        <p-button type="info" round @click.native.prevent="cancelBlock()" id="cancel">
+            Cancel
+        </p-button> 
       </Modal>
     </div>
   </div>
@@ -220,7 +226,7 @@ export default {
       modal_title: "",
       btn_type: "",
       info: {
-        day_of_week: "0",
+        day_of_week: "",
         start_time: "",
         end_time: "",
         break_start_time: null,
@@ -324,6 +330,12 @@ export default {
           this.notifyVue("top", "center", "success", "Schedule added successfully", "ti-announcement");
           this.list();
           this.closeModalSchedule();
+          this.info.day_of_week = ''
+          this.info.start_time = ''
+          this.info.end_time = ''
+          this.info.break_start_time = ''
+          this.info.break_end_time = ''
+          this.info.slot_duration = 30
         })
         .catch((error) => {
           this.loader_save = false;
@@ -399,7 +411,7 @@ export default {
       this.modal_title = "Add Schedule";
       this.btn_type = "add";
       this.info = {
-        day_of_week: "0",
+        day_of_week: "",
         start_time: "",
         end_time: "",
         break_start_time: null,
@@ -458,6 +470,10 @@ export default {
           this.notifyVue("top", "center", "success", "Blocked Date added successfully", "ti-announcement");
           this.listBlockedDates();
           this.closeModalBlockedDate();
+          this.blockedInfo.date = '';
+          this.blockedInfo.type = '';
+          this.blockedInfo.holiday_name = '';
+          this.blockedInfo.reason = '';
         })
         .catch((error) => {
           this.loaderBlockedSave = false;
@@ -546,7 +562,23 @@ export default {
             });
         }
       });
-    }
+    },
+      cancelBlock(){
+        this.closeModalBlockedDate();
+        this.blockedInfo.date = '';
+        this.blockedInfo.type = '';
+        this.blockedInfo.holiday_name = '';
+        this.blockedInfo.reason = '';
+      },
+      cancelSched(){
+          this.closeModalSchedule();
+          this.info.day_of_week = ''
+          this.info.start_time = ''
+          this.info.end_time = ''
+          this.info.break_start_time = ''
+          this.info.break_end_time = ''
+          this.info.slot_duration = 30
+      }
   },
   created() {
     this.list();

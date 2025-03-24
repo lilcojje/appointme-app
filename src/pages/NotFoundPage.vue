@@ -10,14 +10,24 @@
     <div class="error-content">
       <h1>404</h1>
       <p>Sorry, the page you are looking for does not exist.</p>
-      <router-link to="/" class="home-button">Return Home</router-link>
+      <button @click="redirectToLogin" class="home-button">Back to Login</button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "Error404"
+  name: "Error404",
+  methods: {
+    // This is an example method called handleError
+    handleError() {
+      console.log("An error has occurred.");
+      // Add any custom error handling logic here
+    },
+    redirectToLogin(){
+      this.$router.push('/login');
+    }
+  }
 };
 </script>
 

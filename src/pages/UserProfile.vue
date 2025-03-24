@@ -22,6 +22,10 @@
       Edit Profile
     </p-button>
 
+    <p-button type="info" round @click.native.prevent="deleteAccount" class="danger-btn" id="update-profile">
+        Delete Account
+    </p-button>
+
     <Modal :showModal="modalVisible" :title="modal_title" @close="closeModal">
       <loader v-if="loader_save" />
       <fg-input
@@ -216,6 +220,51 @@ export default {
           }
         });
     },
+    deleteAccount() {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you really want to delete your account? This action cannot be undone.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.post(
+                    api.API_URL + "/delete-account",
+                    { user_id: this.user.id },
+                    { headers: { Authorization: `Bearer ${this.token}` } }
+                )
+                .then(() => {
+                    Swal.fire({
+                        title: "Deleted!",
+                        text: "Your account has been successfully deleted. You will no longer have access to your account.",
+                        icon: "success",
+                        confirmButtonColor: "#3085d6"
+                    });
+                })
+                .catch((error) => {
+                    let errorMessage = "An error occurred while deleting your account.";
+                    if (error.response) {
+                        if (error.response.status === 400) {
+                          errorMessage = (error.response.data.error && error.response.data.error.message) || error.response.data.message;
+                        } else if (error.response.status === 422) {
+                            errorMessage = Object.values(error.response.data.errors || {}).flat()[0] || error.response.data.message;
+                        }
+                    }
+                    Swal.fire({
+                        title: "Error!",
+                        text: errorMessage,
+                        icon: "error",
+                        confirmButtonColor: "#d33"
+                    });
+                    console.error(error);
+                });
+            }
+        });
+    },
+
     notifyVue(verticalAlign, horizontalAlign, type, msg, icon) {
       this.$notify({
         title: msg,
@@ -303,6 +352,8 @@ export default {
 .p-button:hover {
   background-color: #0d5a7a;
 }
+
+.danger-btn{background-color: #f2474f; border:1px solid #f2474f; margin-left: 5px;}
 
 /* Responsive Adjustments */
 @media (max-width: 600px) {

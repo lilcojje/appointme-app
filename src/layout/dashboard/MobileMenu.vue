@@ -1,6 +1,7 @@
 <template>
   <ul class="nav navbar-nav nav-mobile-menu">
     <h5 id="fullname" @click="profile"><span class="ti-user"></span>{{ fullname }}</h5>
+   <!--<h5 id="subscribe-to" @click="subscription"><span class="ti-medall"></span><span  v-if="user.subscription.plan=='free'" class="subsc">Upgrade Pro</span><span class="subsc" v-else>(PRO)</span></h5>-->
     <h5 @click="viewForm" id="viewForm"><span class="ti-eye" v-if="enableBooking"></span>View Form</h5>
     <slot></slot>
   </ul>
@@ -43,6 +44,8 @@ export default {
 <style>
 #fullname{text-align: left; color: #fff; cursor: pointer;}
 #fullname span{display: inline-block; margin-left: 7px; margin-right: 10px;}
+#subscribe-to{text-align: left; color: #fff; cursor: pointer;}
+#subscribe-to span{display: inline-block; margin-left: 7px; margin-right: 10px;}
 #viewForm{text-align: left; color: #fff; cursor: pointer;}
 #viewForm span{display: inline-block; margin-left: 7px; margin-right: 10px;}
 </style>

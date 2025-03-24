@@ -94,6 +94,7 @@
                 </tr>
               </tbody>
             </table>
+            <div class="total_records">Total Records: {{total}}</div>
             <paginate
               :page-count="total_page"
               :page-range="1"
@@ -122,18 +123,25 @@
         </select>
       </div>
 
+
+      
+
       <!-- Existing Client Section -->
       <div v-show="view_existing">
-        <multiselect
-          v-model="selectedClient"
-          :options="items"
-          :custom-label="clientLabel"
-          :loading="isLoadingClients"
-          placeholder="Search client"
-          @search-change="fetchClients"
-          track-by="id"
-          label="first_name"
-        ></multiselect>
+        <div class="form-group">
+          <label class="control-label">Search Client:</label>
+            <multiselect
+              v-model="selectedClient"
+              :options="items"
+              :custom-label="clientLabel"
+              :loading="isLoadingClients"
+              placeholder="Search client"
+              @search-change="fetchClients"
+              track-by="id"
+              label="first_name"
+              class="search-client"
+            ></multiselect>
+         </div>
       </div>
 
       <!-- New Client Section (with Email field) -->
@@ -144,11 +152,7 @@
         <fg-input v-model="info.email" label="Email" placeholder="Email" />
       </div>
 
-      <div class="form-group">
-        <label class="control-label">Date</label>
-        <input type="date" v-model="info.date" @change="changeDate" placeholder="Enter Date" :min="minDate" class="form-control" />
-      </div>
-
+      <fg-input type="date" placeholder="Date" v-model="info.date" @change.native="changeDate" :min="minDate" />
 
       <div class="form-group" v-if="timeType=='auto'">
                       <label class="control-label">Select Time</label>
@@ -217,7 +221,9 @@
       <p-button type="info" round @click.native.prevent="updateAppointment" id="add-appointment" v-show="btn_type === 'edit'">
          Update
       </p-button>
-
+      <p-button type="info" round @click.native.prevent="cancel()" id="cancel">
+            Cancel
+       </p-button> 
       
       <div style="clear:both;">&nbsp;</div>
     </Modal>
@@ -236,9 +242,13 @@
         </div>
       </div>
       <div style="clear:both;">&nbsp;</div>
+      
       <p-button type="info" round @click.native.prevent="editEvent(app_data)" class="edt-appointment">
         Edit APPOINTMENT
       </p-button>
+      <p-button type="info" round @click.native.prevent="cancel()" id="cancel">
+            Cancel
+       </p-button> 
       <div style="clear:both;">&nbsp;</div>
     </Modal>
   </div>
@@ -351,7 +361,8 @@ export default {
       schedule_found: false,
       is_not_found_error: false,
       isDateChanged:false,
-      time_type: ''
+      time_type: '',
+      total: 0
     };
   },
   computed: {
@@ -424,6 +435,7 @@ export default {
                 ? appointment.services.join(", ")
                 : "No Service";
           });
+          self.total = data.total;
         })
         .catch(({ response }) => {
           if (response.data.error.code === "token_could_not_verified") {
@@ -519,21 +531,37 @@ export default {
             headers: { Authorization: `Bearer ${self.token}` }
           }
         )
-        .then((data) => {
+        .then((response) => {
           self.loader_save = false;
-          self.notifyVue("top", "center", "success", "Appointment Successfully Added", "ti-announcement");
-          self.list();
-          self.closeModalAppointment();
-          // Clear fields
-          self.info.first_name = "";
-          self.info.last_name = "";
-          self.info.contact_number = "";
-          self.info.email = "";
-          self.info.status = "";
-          self.info.date = "";
-          self.info.time = "";
-          self.services = [];
-          self.handleMonthChange();
+          if (response.data.error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Limit Reached',
+                    text: 'Adding Appointment has reached the limit. Please upgrade to Pro.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Subscribe',
+                    cancelButtonText: 'Close'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.$router.push('/subscription')
+                    }
+                });
+            }else{
+              self.notifyVue("top", "center", "success", "Appointment Successfully Added", "ti-announcement");
+              self.list();
+              self.closeModalAppointment();
+              // Clear fields
+              self.info.first_name = "";
+              self.info.last_name = "";
+              self.info.contact_number = "";
+              self.info.email = "";
+              self.info.status = "";
+              self.info.date = "";
+              self.info.time = "";
+              self.services = [];
+              self.handleMonthChange();
+            } 
+
           self.add_btn = true;
         })
         .catch((error) => {
@@ -710,7 +738,7 @@ export default {
       self.calendar_list = false;
       
       Swal.fire({
-        title: "Want to reschedule?",
+        title: "Want to delete this appointment?",
         text: "Do you really want to delete this appointment?",
         icon: "warning",
         showCancelButton: true,
@@ -942,7 +970,6 @@ export default {
     },
 
     changeDate() {
-      
         this.isDateChanged = true; // Set flag to indicate the date was changed
         this.getTimeList();
     }
@@ -1185,7 +1212,17 @@ export default {
       if(eventData.displayTime.length==8){
         this.changeTime();
       }
-    }
+    },cancel(){
+        this.closeModalAppointment();
+        this.info.first_name = "";
+        this.info.last_name = "";
+        this.info.contact_number = "";
+        this.info.email = "";
+        this.info.status = "";
+        this.info.date = "";
+        this.info.time = "";
+        this.services = [];
+      }
   },
   created() {
     this.select_view = 'list';
@@ -1194,6 +1231,7 @@ export default {
     this.client_name = localStorage.getItem("client_name");
     this.info.client_id = this.$route.params.id;
     this.fetchServiceOptions();
+    this.fetchClients('');
 
     // const timeTypeSetting = this.businessProfile.setting.find(item => item.key === 'time_type');
     //       const timeTypeValue = timeTypeSetting ? timeTypeSetting.value : null;
@@ -1349,4 +1387,5 @@ a.fc-event {
 .action .btn-info{margin: 0 2px; padding: 4px 9px;}
 
 .status{display: inline-block;}
+.search-client{margin-bottom: 20px;}
 </style>
