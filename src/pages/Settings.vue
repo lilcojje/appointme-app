@@ -295,6 +295,8 @@ export default {
           // Update businessProfile with response data (including logo URL)
           self.businessProfile = response.data.business || self.businessProfile;
           self.notifyVue("top", "center", "success", "Business Profile updated successfully", "ti-announcement");
+          store.commit('setUser', response.data.user); 
+          store.commit('setSettings', response.data.user.settings);
         })
         .catch((error) => {
           if (error.response && error.response.data) {

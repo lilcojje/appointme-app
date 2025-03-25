@@ -287,7 +287,7 @@ export default {
           business_name: this.business_name,
           business_email: this.business_email,
           business_address: this.business_address,
-          business_phone: this.business_phone,
+          business_phone: parseInt(this.business_phone, 10) || 0,
           business_description: this.business_description,
           time_zone: this.settings.time_zone,
           currency_code: this.settings.currency_code

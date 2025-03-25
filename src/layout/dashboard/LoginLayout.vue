@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper login-wrap">
       <div id="logo-wrap">
           <img src="@/assets/img/logo.png" id="logo-login"/>
       </div>
@@ -48,13 +48,16 @@
 
           <div class="row">
             <div class="col-md-12 password-field">
-              <div id="g_id_onload"
-                data-client_id="982363249873-dmq6of1ubi3lgvkmhllqdslqfbmi2eov.apps.googleusercontent.com"
-                data-callback="handleCredentialResponse"
-                data-auto_prompt="false">
+              <div class="google-signin-container">
+                <div id="g_id_onload"
+                  data-client_id="982363249873-dmq6of1ubi3lgvkmhllqdslqfbmi2eov.apps.googleusercontent.com"
+                  data-callback="handleCredentialResponse"
+                  data-auto_prompt="false"
+                  data-position="center"
+                  >
+                </div>
+                <div class="g_id_signin" data-type="standard"></div>
               </div>
-
-              <div class="g_id_signin" data-type="standard"></div>
             </div>
           </div>
           
@@ -71,7 +74,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
   background: linear-gradient(135deg, #ece9e6, #ffffff);
   padding: 20px;
   font-family: 'Open Sans', sans-serif;
@@ -178,6 +180,10 @@
     width: 90%;
   }
 
+  .wrapper{
+    min-height: 68vh!important; /* Make it fill the screen */
+    display: flex;
+  }
  
 }
 
@@ -189,6 +195,15 @@
   font-size: 16px;
   cursor: pointer;
 }
+
+.google-signin-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.login-wrap{height: 68vh!important;}
 
 </style>
 

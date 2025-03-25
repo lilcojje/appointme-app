@@ -40,6 +40,8 @@ import ConfirmAppointment from "@/layout/dashboard/ConfirmAppointment.vue";
 import SubscriptionLayout from "@/layout/dashboard/SubscriptionLayout.vue";
 import CheckoutLayout from "@/layout/dashboard/CheckoutLayout.vue";
 import PaypalSuccess from "@/layout/dashboard/PaypalSuccess.vue";
+import PaypalCancel from "@/layout/dashboard/PaypalCancel.vue";
+
 
 const routes = [
   {
@@ -238,10 +240,14 @@ const routes = [
   },
   {
     path: "/paypal-success",
-    name: "checkout",
+    name: "paypal success",
     component: PaypalSuccess,
   },
-  
+  {
+    path: "/paypal-cancel",
+    name: "paypal cancel",
+    component: PaypalCancel,
+  },
   { path: "*", name: "not-found", component: NotFound },
 ];
 
