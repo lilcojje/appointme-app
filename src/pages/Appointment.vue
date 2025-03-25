@@ -2,7 +2,6 @@
   <div id="page-appointment">
     <div class="row">
       <div class="col-12">
-        <router-link to="/dashboard" tag="button" class="back-home">Back to Home</router-link>
         <card>
           <div slot="raw-content" class="table-responsive">
             <div class="row" id="top-tool-bar">
@@ -1266,6 +1265,7 @@ export default {
 }
 #search {
   width: 50%;
+  padding:5px;
 }
 .pagination li {
   margin-right: 20px;

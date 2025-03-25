@@ -9,7 +9,10 @@
                <input type="text" v-model="search_value" @input="search" id="search">
             </div>
             <div class="col-6">
-                <p-button type="info" round @click.native.prevent="redirectToser" id="add-service">
+               <p-button class="tool-btn" type="info" round @click.native.prevent="modalAddCategory" id="add-categories">
+                  Add Categories
+                </p-button>
+                <p-button class="tool-btn" type="info" round @click.native.prevent="redirectToser" id="add-service">
                   Services
                 </p-button>
               </div>
@@ -314,4 +317,15 @@ export default {
 }
 
 .action .btn-info{margin: 0 2px;}
+.tool-btn{float: right; margin:0 3px;}
+
+@media (max-width: 768px) {
+  .modal {
+    width: 100% !important;
+  }
+  #search{width: 100% !important;}
+  #add-categories{float:none!important;}
+  .tool-btn{margin:0 3px;}
+  .tool-btn{float: none!important;}
+}
 </style>

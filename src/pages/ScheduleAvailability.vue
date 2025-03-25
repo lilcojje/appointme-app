@@ -632,4 +632,5 @@ export default {
 }
 
 .center-text{text-align: center;}
+.tab-menu button{width: 100%; margin-bottom: 5px;}
 </style>

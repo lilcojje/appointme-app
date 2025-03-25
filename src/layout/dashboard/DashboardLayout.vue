@@ -92,7 +92,11 @@
   </div>
 </template>
 <style lang="scss">
-.wrapper .sidebar .nav .nav-item .nav-link{margin: 7px 0px!important;}
+.wrapper .sidebar .nav .nav-item .nav-link{margin: 7px 0px;}
+
+@media (max-width: 768px) {
+  .wrapper .sidebar .nav .nav-item .nav-link{margin: 0px;}
+}
 </style>
 <script>
 import axios from 'axios'
@@ -149,7 +153,7 @@ export default {
       // For example, if your user object stores permissions under "role.permissions",
       // you might use: this.user.role && this.user.role.permissions.some(...)
       return this.user.permissions && this.user.permissions.some(p => p === permission);
-    }
+    },
   },
   created(){
     this.role_name = this.user.role_name;

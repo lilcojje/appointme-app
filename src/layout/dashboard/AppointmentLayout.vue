@@ -70,7 +70,7 @@
     </transition>
 
     <!-- Appointment Form -->
-    <transition name="fade" v-if="!isCancelView && !isRescheduledView && !isView">
+    <div v-if="!isCancelView && !isRescheduledView && !isView">
       <div class="appointment-form" v-if="choose_show">
         <loader v-if="loader" />
         <!-- Suggested Title for the Appointment Form -->
@@ -240,7 +240,7 @@
 
       </div>
       <div style="clear:both">&nbsp;</div>
-    </transition>
+    </div>
   </div>
 </template>
 

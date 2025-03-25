@@ -6,7 +6,7 @@
           <div slot="raw-content" class="table-responsive">
             <div class="row" id="top-tool-bar">
               <div class="col-6">
-                <input type="text" v-model="search_value" @input="search" id="search">
+                <input type="text" v-model="search_value" placeholder="Search"  @input="search" id="search">
               </div>
               <div class="col-6">
                 <p-button type="info" round @click.native.prevent="modalAddClient" id="add-client" v-show="user.permissions.includes('add_clients')">

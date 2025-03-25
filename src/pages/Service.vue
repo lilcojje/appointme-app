@@ -6,13 +6,13 @@
           <div slot="raw-content" class="table-responsive">
             <div class="row" id="top-tool-bar">
               <div class="col-6">
-                <input type="text" v-model="search_value" @input="search" id="search" />
+                <input type="text" v-model="search_value" placeholder="Search"  @input="search" id="search" />
               </div>
               <div class="col-6 align-right">
-                <p-button type="info" round @click.native.prevent="modalAddService" id="add-service" v-show="user.permissions.includes('add_services')">
+                <p-button type="info" class="tool-btn" round @click.native.prevent="modalAddService" v-show="user.permissions.includes('add_services')">
                   Add Services
                 </p-button>
-                <p-button type="info" round @click.native.prevent="redirectTocat" id="add-categories" v-show="user.permissions.includes('view_permissions')">
+                <p-button type="info" class="tool-btn" round @click.native.prevent="redirectTocat" id="add-categories" v-show="user.permissions.includes('view_permissions')">
                   Categories
                 </p-button>
               </div>
@@ -660,11 +660,18 @@ export default {
   font-size: 20px;
 }
 
-@media screen and (max-width: 600px) {
+
+@media (max-width: 768px) {
   .modal {
     width: 100% !important;
   }
+  #search{width: 100% !important;}
+  #add-categories{float:none!important;}
+  .tool-btn{margin:0 3px;}
+  .tool-btn{float: none!important;}
 }
+
+.tool-btn{float: right;}
 
 .error-message {
   color: red;
@@ -680,4 +687,6 @@ export default {
 .action .btn-info {
   margin: 0 2px;
 }
+
+
 </style>

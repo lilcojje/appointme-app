@@ -2,12 +2,10 @@
   <div id="page-transactions">
   <div class="row">
     <div class="col-12">
-      
-      <router-link to="/dashboard" tag="button" class="back-home">Back to Home</router-link>
       <card>
         <div slot="raw-content" class="table-responsive">
           <div class="row" id="top-tool-bar">
-            <div class="col-6">
+            <div class="col-8 filter-gen">
               <!-- New client name filter input -->
               <multiselect
                 v-model="selectedClientSearch"
@@ -19,14 +17,15 @@
                 track-by="id"
                 label="first_name"
                 class="client-search"
-              ></multiselect>
+              >
+            </multiselect>
               <date-picker v-model="date_range" placeholder="Select date range" range></date-picker>
               <p-button type="info" round @click.native.prevent="generate" id="generate">
                 Generate
               </p-button>
               <div style="clear:both; height: 0;"></div>
             </div>
-            <div class="col-6 trans">
+            <div class="col-4 trans mbl">
               <p-button type="info" round @click.native.prevent="modalAddTransact" id="add-transact">
                 Add Sales
               </p-button>
@@ -140,17 +139,18 @@
               @input="serviceChanged(service, index)"
               class="services_input"
             ></multiselect>
-            {{currency_label}}
+            <span class="cur_label">{{currency_label}}</span>
             <input
               v-model="service.price"
               placeholder="Price"
-              class="w-full py-2 border border-indigo-500 rounded prices"
+              class="w-full py-2 border border-indigo-500 rounded prices-input"
               @input="price"
               readonly
             />
             <p-button type="info" v-if="index !== 0" round @click.native.prevent="remove(index)" class="trash-service">
               <span class="ti-trash"></span>
             </p-button>
+            <div style="clear: both;">&nbsp;</div>
           </div>
           <p-button type="info" v-if="index === services.length - 1" round @click.native.prevent="addMore(index)" class="add-services">Add Service</p-button>
         </div>
@@ -905,12 +905,23 @@ export default {
 #client-notes{width:100%;}
 #generate{margin-left: 10px;}
 .report-text-head{padding-left: 16px; font-size: 16px;}
-.client-search{display: inline-block; width: 39%;}
+.client-search{display: inline-block; width: 45%;}
 .back-home{margin-bottom: 20px; background: #106c9c; color:#fff; border:none;}
 .total-wrap{margin-left:10px; margin-bottom: 30px;}
 .total-wrap h4{margin-top: 0px!important;}
-.services_input{display: inline-block!important; width: 48%!important; margin-right: 9px!important;}
+.services_input_type{display: inline-block!important; width: 100%!important; }
 #payment-method{padding:20px 0;}
-.prices{border:none!important;}
+.prices-input{border:none!important; width: 100%!important; padding-left: 24px;}
+.cur_label{position: absolute; margin-top: 8px; margin-left: 11px;}
+.trash-service{float: right; margin-top: 11px;}
+#page-transactions .mx-input{padding: 20px; margin-left: 10px;}
 #cancel{float: right; margin-right:5px;}
+
+@media (max-width: 768px) {
+  .filter-gen{flex: none!important;  max-width: 100%!important;}
+  .client-search{width: 100%; margin-bottom: 8px;}
+  #page-transactions #top-tool-bar{text-align: center;}
+  .mbl{margin-top:20px; flex: none!important;  max-width: 100%!important;}
+  #page-transactions .mx-input{margin-left: 0px!important;}
+}
 </style>

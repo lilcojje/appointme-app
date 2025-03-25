@@ -203,7 +203,6 @@
   width: 100%;
 }
 
-.login-wrap{height: 68vh!important;}
 
 </style>
 

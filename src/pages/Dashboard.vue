@@ -1,7 +1,113 @@
 <template>
   <div id="page-dashboard">
     <loader v-if="loader"/> 
-    
+    <h4>Today's Insights</h4>
+    <div class="row">
+      <div class="col-md-6 col-xl-3">
+        <div class="card" @click="redirectTo('transactions')">
+            <div class="card-body">
+              <div>
+                <div class="row">
+                  <div class="col-5">
+                    <div class="icon-big text-center icon-warning">
+                      <i class="ti-money"></i>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="numbers">
+                      <p>Sales</p> <span class="mid-desc">{{currency_label}}{{formattedTotalSales}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <hr>
+                  <div class="stats">
+                    <i class="ti-reload"></i> Updated now
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="card" @click="redirectTo('appointments')">
+            <div class="card-body">
+              <div>
+                <div class="row">
+                  <div class="col-5">
+                    <div class="icon-big text-center icon-danger">
+                      <i class="ti-calendar"></i>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="numbers">
+                      <p>Pending</p> {{totalPending}}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <hr>
+                  <div class="stats">
+                    <i class="ti-reload"></i> Updated now
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+         <div class="card" @click="redirectTo('appointments')">
+            <div class="card-body">
+              <div>
+                <div class="row">
+                  <div class="col-5">
+                    <div class="icon-big text-center icon-success">
+                      <i class="ti-thumb-up"></i>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="numbers">
+                      <p>Completed</p> {{totalCompleted}}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <hr>
+                  <div class="stats">
+                    <i class="ti-reload"></i> Updated now
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="card" @click="redirectTo('appointments')">
+            <div class="card-body">
+              <div>
+                <div class="row">
+                  <div class="col-5">
+                    <div class="icon-big text-center icon-danger">
+                      <i class="ti-na"></i>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="numbers">
+                      <p>Cancelled</p> {{totalCancelled}}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <hr>
+                  <div class="stats">
+                    <i class="ti-reload"></i> Updated now
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
     <card title="Today's Appointment">
         <div slot="raw-content" class="table-responsive">
           <table class="table table-striped" id="appoint-tbl">
@@ -86,46 +192,115 @@
        
       </card>
 
+    <h4>Insights</h4>
 
-    
     <div class="row">
       <div class="col-md-6 col-xl-3">
-        <div class="card">
-          <div class="card-body">
-            <div class="row">
-              <div class="col-7 num-info">
-                <div class="numbers">
-                  <p>Clients</p>
-                  {{ totalClients.toLocaleString() }}
+        <div class="card" @click="redirectTo('subscription')">
+            <div class="card-body">
+              <div>
+                <div class="row">
+                  <div class="col-5">
+                    <div class="icon-big text-center icon-danger">
+                      <i class="ti-crown"></i>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="numbers">
+                      <p>Subscription</p> <span class="sml-desc">{{ user.subscription.plan }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <hr>
+                  <div class="stats">
+                    <i class="ti-reload"></i> Updated Plan
+                  </div>
                 </div>
               </div>
             </div>
-            <hr>
-            <div class="stats">
-              <i class="ti-reload"></i> Updated now
-            </div>
           </div>
-        </div>
       </div>
       <div class="col-md-6 col-xl-3">
-        <div class="card">
-          <div class="card-body">
-            <div class="row">
-              <div class="col-7 num-info">
-                <div class="numbers">
-                  <p>Users</p>
-                  {{ totalUsers.toLocaleString() }}
+        <div class="card" @click="redirectTo('clients')">
+            <div class="card-body">
+              <div>
+                <div class="row">
+                  <div class="col-5">
+                    <div class="icon-big text-center icon-info">
+                      <i class="ti-user"></i>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="numbers">
+                      <p>Clients</p> {{ totalClients.toLocaleString() }}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <hr>
+                  <div class="stats">
+                    <i class="ti-reload"></i> New Clients
+                  </div>
                 </div>
               </div>
             </div>
-            <hr>
-            <div class="stats">
-              <i class="ti-reload"></i> Updated now
+          </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="card" @click="redirectTo('users')">
+            <div class="card-body">
+              <div>
+                <div class="row">
+                  <div class="col-5">
+                    <div class="icon-big text-center icon-warning">
+                      <i class="ti-server"></i>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="numbers">
+                      <p>Users</p> {{ totalUsers.toLocaleString() }}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <hr>
+                  <div class="stats">
+                    <i class="ti-reload"></i> Active Users
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="card" @click="redirectTo('services')">
+            <div class="card-body">
+              <div>
+                <div class="row">
+                  <div class="col-5">
+                    <div class="icon-big text-center icon-danger">
+                      <i class="ti-ruler-alt"></i>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="numbers">
+                      <p>Services</p> {{ totalServices.toLocaleString() }}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <hr>
+                  <div class="stats">
+                    <i class="ti-reload"></i> New Services
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -143,11 +318,17 @@ export default {
       loader: false,
       totalClients: 0,
       totalUsers: 0,
+      totalServices: 0,
+      totalSales: 0,
+      totalPending: 0,
+      totalCompleted: 0,
+      totalCancelled: 0,
       todaysAppointments: [],
       upcomingAppointments: [],
       todayPage: 1,
       upcomingPage: 1,
-      itemsPerPage: 5, // Number of items per page
+      itemsPerPage: 5, 
+      currency_label: ''
     };
   },
   computed: {
@@ -172,6 +353,14 @@ export default {
       const start = (this.upcomingPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
       return this.upcomingAppointments.slice(start, end);
+    },
+    settings() {
+      // Ensure it's an array
+      return this.$store.state.settings;
+    },
+    formattedTotalSales() {
+      let total = Number(this.totalSales) || 0; // Convert to number and handle null/undefined
+      return total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
   },
   methods: {
@@ -186,6 +375,12 @@ export default {
 
         this.totalClients = response.data.total_clients;
         this.totalUsers = response.data.total_users;
+        this.totalServices = response.data.total_services;
+        this.totalSales = response.data.total_sales;
+        this.totalPending = response.data.total_pending;
+        this.totalCompleted = response.data.total_completed;
+        this.totalCancelled = response.data.total_cancelled;
+       
         this.todaysAppointments = response.data.todays_appointments.data || [];
         this.upcomingAppointments = response.data.upcoming_appointments.data || [];
 
@@ -246,12 +441,17 @@ export default {
         Declined: "#c0392b"
       };
       return statusColors[status] || "#bdc3c7"; // Default gray if status is unknown
-    }
+    },
+    redirectTo(redirect) {
+        this.$router.push("/"+redirect);
+      }
   },
   mounted() {
     // console.log(this.$store.state.user);
 
     this.fetchDashboardData();
+    const plainSettings = JSON.parse(JSON.stringify(this.settings));
+    this.currency_label = plainSettings.currency_symbol;
   }
 };
 </script>
@@ -420,6 +620,8 @@ a.fc-event {
 .pagination-btn:hover:not(:disabled) {
   background-color: #0b4a70;
 }
+.sml-desc{font-size: 14px; text-transform: uppercase; font-weight: bold;}
+.mid-desc{font-size: 18px; text-transform: uppercase; font-weight: bold; color:green;}
 
 .status{display: inline-block;}
 
