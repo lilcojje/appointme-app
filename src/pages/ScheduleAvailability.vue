@@ -18,7 +18,7 @@
             <div slot="raw-content" class="table-responsive">
               <div class="row" id="top-tool-bar">
                 <div class="col-6">&nbsp;</div>
-                <div class="col-6">
+                <div class="col-6 add-btn-wrap">
                   <p-button type="info" round @click.native.prevent="modalAddSchedule" id="add-schedule">
                     Add Schedule
                   </p-button>
@@ -30,9 +30,9 @@
                   <th>Day</th>
                   <th>Start Time</th>
                   <th>End Time</th>
-                  <th>Break Start</th>
-                  <th>Break End</th>
-                  <th style="width: 5%; text-align: center;">Available</th>
+                  <th class="hide-to-mobile">Break Start</th>
+                  <th class="hide-to-mobile">Break End</th>
+                  <th style="width: 5%; text-align: center;" class="hide-to-mobile">Available</th>
                   <th style="text-align: center;">Action</th>
                 </thead>
                 <tbody v-if="schedules.total > 0">
@@ -40,9 +40,9 @@
                     <td>{{ dayNames[schedule.day_of_week] }}</td>
                     <td>{{ formatTime(schedule.start_time) }}</td>
                     <td>{{ formatTime(schedule.end_time) }}</td>
-                    <td>{{ schedule.break_start_time ? formatTime(schedule.break_start_time) : '-' }}</td>
-                    <td>{{ schedule.break_end_time ? formatTime(schedule.break_end_time) : '-' }}</td>
-                    <td style="width: 5%; text-align: center;">{{ schedule.is_available ? 'Yes' : 'No' }}</td>
+                    <td class="hide-to-mobile">{{ schedule.break_start_time ? formatTime(schedule.break_start_time) : '-' }}</td>
+                    <td class="hide-to-mobile">{{ schedule.break_end_time ? formatTime(schedule.break_end_time) : '-' }}</td>
+                    <td class="hide-to-mobile" style="width: 5%; text-align: center;">{{ schedule.is_available ? 'Yes' : 'No' }}</td>
                     <td class="action">
                       <p-button type="info" round @click.native.prevent="modalEditSchedule(schedule)" v-show="user.permissions.includes('edit_availability')">
                         <span class="ti-pencil"></span>
@@ -632,5 +632,5 @@ export default {
 }
 
 .center-text{text-align: center;}
-.tab-menu button{width: 100%; margin-bottom: 5px;}
+
 </style>

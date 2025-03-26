@@ -42,10 +42,10 @@ export default {
 };
 </script>
 <style>
-#fullname{text-align: left; color: #fff; cursor: pointer;}
+#fullname{text-align: left; color: #fff; cursor: pointer; font-size: 14px; font-weight: bold;}
 #fullname span{display: inline-block; margin-left: 7px; margin-right: 10px;}
 #subscribe-to{text-align: left; color: #fff; cursor: pointer;}
 #subscribe-to span{display: inline-block; margin-left: 7px; margin-right: 10px;}
-#viewForm{text-align: left; color: #fff; cursor: pointer;}
+#viewForm{text-align: left; color: #fff; cursor: pointer; font-size: 14px; font-weight: bold;}
 #viewForm span{display: inline-block; margin-left: 7px; margin-right: 10px;}
 </style>

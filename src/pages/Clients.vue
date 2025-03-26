@@ -8,7 +8,7 @@
               <div class="col-6">
                 <input type="text" v-model="search_value" placeholder="Search"  @input="search" id="search">
               </div>
-              <div class="col-6">
+              <div class="col-6 add-btn-wrap">
                 <p-button type="info" round @click.native.prevent="modalAddClient" id="add-client" v-show="user.permissions.includes('add_clients')">
                   Add Client
                 </p-button>
@@ -18,19 +18,19 @@
             <table class="table table-striped tbl-style" id="client-tbl">
               <thead>
                 <th style="text-align: center;">First Name</th>
-                <th style="text-align: center;">Last Name</th>
-                <th style="text-align: center;">Email</th> <!-- New Email column -->
-                <th style="text-align: center;">Contact Number</th>
-                <th style="text-align: center;">Date Added</th>
+                <th style="text-align: center;" class="hide-to-mobile">Last Name</th>
+                <th style="text-align: center;" class="hide-to-mobile">Email</th> <!-- New Email column -->
+                <th style="text-align: center;" class="hide-to-mobile">Contact Number</th>
+                <th style="text-align: center;" class="hide-to-mobile">Date Added</th>
                 <th style="text-align: center;" class="action">Action</th>
               </thead>
               <tbody v-if="clients.total > 0">
                 <tr v-for="(client,index) in clients.data" :key="index">
                   <td style="text-align: center;">{{ client.first_name }}</td>
-                  <td style="text-align: center;">{{ client.last_name }}</td>
-                  <td style="text-align: center;">{{ client.email }}</td> <!-- Render email -->
-                  <td style="text-align: center;">{{ client.contact_number }}</td>
-                  <td style="text-align: center;">{{ dateToString(client.created_at) }}</td>
+                  <td style="text-align: center;" class="hide-to-mobile">{{ client.last_name }}</td>
+                  <td style="text-align: center;" class="hide-to-mobile">{{ client.email }}</td> <!-- Render email -->
+                  <td style="text-align: center;" class="hide-to-mobile">{{ client.contact_number }}</td>
+                  <td style="text-align: center;" class="hide-to-mobile">{{ dateToString(client.created_at) }}</td>
                   <td class="action">
                     <p-button type="info" round @click.native.prevent="modalEditClient(client)" v-show="user.permissions.includes('edit_clients')">
                       <span class="ti-pencil"></span>

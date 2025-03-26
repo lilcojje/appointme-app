@@ -8,7 +8,7 @@
               <div class="col-6">
                 <input type="text" v-model="search_value" placeholder="Search"  @input="search" id="search" />
               </div>
-              <div class="col-6 align-right">
+              <div class="col-6 align-right add-btn-wrap">
                 <p-button type="info" class="tool-btn" round @click.native.prevent="modalAddService" v-show="user.permissions.includes('add_services')">
                   Add Services
                 </p-button>
@@ -21,15 +21,15 @@
             <table class="table table-striped tbl-style" id="service-tbl">
               <thead>
                 <th style="text-align: center;">Service Name</th>
-                <th style="text-align: center;">Price</th>
-                <th style="text-align: center;">Category</th>
+                <th style="text-align: center;" class="hide-to-mobile">Price</th>
+                <th style="text-align: center;" class="hide-to-mobile">Category</th>
                 <th style="text-align: center;" class="action">Action</th>
               </thead>
               <tbody v-if="services.total > 0">
                 <tr v-for="(service,index) in services.data" :key="index">
                   <td style="text-align: center;">{{ service.name }}</td>
-                  <td style="text-align: center;">{{currency_label}}{{ service.price }}</td>
-                  <td style="text-align: center;">
+                  <td style="text-align: center;" class="hide-to-mobile">{{currency_label}}{{ service.price }}</td>
+                  <td style="text-align: center;" class="hide-to-mobile">
                     {{ service.service_category ? service.service_category.name : 'N/A' }}
                   </td>
                   <td style="text-align: center;" class="action">

@@ -100,6 +100,32 @@
           Select the currency to be used for transactions and pricing display.
         </p>
       </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" v-model="settings.enable_discount"  @change="enable_discount_choices($event.target.checked)"/>
+          Enable Discount
+        </label>
+        <div v-if="enable_discount_opt">
+          <label><input type="radio" v-model="settings.enable_discount_type" value="fixed">Fixed Amount Discount</label>
+          <label><input type="radio" v-model="settings.enable_discount_type" value="percentage">Percentage Discount</label>
+        </div>
+        <p class="item-description">
+          Enable discount to sales transaction.
+        </p>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" v-model="settings.enable_tax"  @change="enable_tax_choices($event.target.checked)"/>
+          Enable Tax
+        </label>
+        <div v-if="enable_tax_opt">
+          <label><input type="radio" v-model="settings.enable_tax_type" value="fixed">Fixed Amount Tax</label>
+          <label><input type="radio" v-model="settings.enable_tax_type" value="percentage">Percentage Tax</label>
+        </div>
+        <p class="item-description">
+          Enable tax to sales transaction.
+        </p>
+      </div>
       <button @click="updateSettings">Save Settings</button>
     </div>
 
@@ -157,7 +183,10 @@ export default {
         currency_code: "",
         number_of_slots: "",
         slot_duration: "",
-        time_type:""
+        time_type:"",
+        enable_discount: false,
+        enable_discount_type:'',
+        enable_tax_type:'',
       },
       IMG_URL: '',
       timeZones: [],
@@ -173,6 +202,8 @@ export default {
       enable_booking_btn: false,
       logoFile: null,
       loader_save: false,
+      enable_discount_opt: false,
+      enable_tax_opt: false,
     };
   },
   computed:{
@@ -205,9 +236,14 @@ export default {
         .then(response => {
           const data = response.data;
           data.enable_booking = !!Number(data.enable_booking);
+          data.enable_discount = !!Number(data.enable_discount);
+          data.enable_tax = !!Number(data.enable_tax);
           data.currency_code = this.currencyList.find(
               currency => currency.code === data.currency_code
             );
+          this.enable_discount_opt = !!Number(data.enable_discount);
+          this.enable_tax_opt = !!Number(data.enable_tax);
+          
           this.settings = response.data;
         });
     },
@@ -341,7 +377,14 @@ export default {
     enable_book_btn(value){
        // Update the local flag for showing the booking link container
       this.enable_booking_btn = value;
-    }
+    },
+    enable_discount_choices(value){
+      this.enable_discount_opt = value;
+    },
+    enable_tax_choices(value){
+      this.enable_tax_opt = value;
+    },
+    
   }
 };
 </script>

@@ -27,7 +27,7 @@
                   <option value="Declined">Declined</option>
                 </select>
               </div>
-              <div class="col-6">
+              <div class="col-6 add-btn-wrap">
                 <p-button type="info" round @click.native.prevent="modalAddAppointment" id="add-appointment" v-show="user.permissions.includes('add_appointments')">
                   Add Appointment
                 </p-button>
@@ -50,26 +50,28 @@
             <FullCalendar ref="cc" :options="calendarOptions" id="fullcalendar" v-if="calendar_list" />
             <table class="table table-striped tbl-style" id="appoint-tbl" v-if="view_list && select_view !== ''">
               <thead>
-                <th>ID</th>
+                <th class="hide-to-mobile">ID</th>
                 <th>First Name</th>
-                <th>Last Name</th>
-                <th>Contact Number</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Services</th>
-                <th>Status</th>
+                <th class="hide-to-mobile">Last Name</th>
+                <th class="hide-to-mobile">Contact Number</th>
+                <th style="text-align: center;">Date <span class="hide-desktop">Time</span></th>
+                <th style="text-align: center;" class="hide-to-mobile">Time</th>
+                <th class="hide-to-mobile">Services</th>
+                <th class="hide-to-mobile">Status</th>
                 <th style="text-align: center;">Action</th>
               </thead>
               <tbody v-if="appointments.total > 0">
                 <tr v-for="(appointment, index) in appointments.data" :key="index">
-                  <td>{{ appointment.id }}</td>
+                  <td class="hide-to-mobile">{{ appointment.id }}</td>
                   <td>{{ appointment.client ? appointment.client.first_name : 'N/A' }}</td>
-                  <td>{{ appointment.client ? appointment.client.last_name : 'N/A' }}</td>
-                  <td>{{ appointment.client ? appointment.client.contact_number : 'N/A' }}</td>
-                  <td>{{ appointment.appointment_date }}</td>
-                  <td>{{ appointment.appointment_time }}</td>
-                  <td>{{ appointment.formated_service }}</td>
-                  <td>
+                  <td class="hide-to-mobile">{{ appointment.client ? appointment.client.last_name : 'N/A' }}</td>
+                  <td class="hide-to-mobile">{{ appointment.client ? appointment.client.contact_number : 'N/A' }}</td>
+                  <td style="text-align: center;">{{ appointment.appointment_date }}<span class="hide-desktop">{{ appointment.appointment_time }}</span> <span class="status hide-desktop" :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
+                      {{ appointment.status }}
+                    </span><span class="hide-desktop">{{ appointment.formated_service }}</span></td>
+                  <td style="text-align: center;" class="hide-to-mobile">{{ appointment.appointment_time }}</td>
+                  <td class="hide-to-mobile">{{ appointment.formated_service }}</td>
+                  <td class="hide-to-mobile">
                     <span class="status" :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
                       {{ appointment.status }}
                     </span>
@@ -1388,4 +1390,5 @@ a.fc-event {
 
 .status{display: inline-block;}
 .search-client{margin-bottom: 20px;}
+.hide-desktop{display: none;}
 </style>

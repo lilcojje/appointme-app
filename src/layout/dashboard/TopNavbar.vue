@@ -139,6 +139,18 @@ export default {
   #sub-link{
     display: none;
   }
+  .hide-to-mobile{display: none;}
 }
+
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  #view-form {
+    display: none;
+  }
+  
+  #sub-link{
+    display: none;
+  }
+}
+
 
 </style>

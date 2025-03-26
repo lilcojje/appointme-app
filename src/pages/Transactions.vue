@@ -39,24 +39,24 @@
           <loader v-if="loader"/>
           <table class="table table-striped" id="transact-tbl">
    <thead>
-      <th>Date</th>
-      <th>Time</th>
-      <th>Full Name</th>
-      <th>Services</th>
-      <th>Status</th>
-      <th>Payment</th>
-      <th>Total</th>
+      <th style="text-align: center;">Date<span class="hide-desktop"> Time</span></th>
+      <th class="hide-to-mobile">Time</th>
+      <th><span class="hide-to-mobile">Full Name</span></th>
+      <th class="hide-to-mobile">Services</th>
+      <th class="hide-to-mobile">Status</th>
+      <th class="hide-to-mobile">Payment</th>
+      <th class="hide-to-mobile">Total</th>
       <th class="action">Action</th>
    </thead>
    <tbody v-if="transactions.total > 0">
                                     <tr v-for="(transact,index) in transactions.data" :key="index">
-                                        <td>{{ transact.date }}</td>
-                                        <td>{{ transact.time }}</td>
-                                        <td>{{ transact.client ? transact.client.first_name : 'No client' }}</td>
-                                        <td>{{ formatServices(transact) }}</td>
-                                        <td>{{ transact.status }}</td>
-                                        <td>{{ transact.payment_method == '' || transact.status =='Unpaid' ? 'Pending \n to Update' : transact.payment_method}}</td>
-                                        <td>{{currency_label}} {{ Number(transact.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</td>
+                                        <td style="text-align: center;">{{ transact.date }}<span class="hide-desktop">{{ formatTime(transact.time) }}</span></td>
+                                        <td class="hide-to-mobile">{{ formatTime(transact.time) }}</td>
+                                        <td>{{ transact.client ? transact.client.first_name : 'No client' }}<span class="hide-desktop"><b>Services:</b> {{ formatServices(transact) }}</span><span class="hide-desktop"><b>Status:</b> {{ transact.status }}</span><span class="hide-desktop"><b>Payment:</b> {{ transact.payment_method == '' || transact.status =='Unpaid' ? 'Pending \n to Update' : transact.payment_method}}</span><br/><span class="hide-desktop"><b>Total:</b> {{currency_label}}{{ Number(transact.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span></td>
+                                        <td class="hide-to-mobile">{{ formatServices(transact) }}</td>
+                                        <td class="hide-to-mobile">{{ transact.status }}</td>
+                                        <td class="hide-to-mobile">{{ transact.payment_method == '' || transact.status =='Unpaid' ? 'Pending \n to Update' : transact.payment_method}}</td>
+                                        <td class="hide-to-mobile">{{currency_label}} {{ Number(transact.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</td>
                                         <td class="action">
                                               <p-button type="info" round @click.native.prevent="modalEditTransact(transact)">
                                                 <span class="ti-pencil"></span>
@@ -206,15 +206,17 @@
                   label="Discount"
                   placeholder="Discount"
                   v-model="info.discount"
-            />
-
+             v-if="enable_discount" @input.native="discount"/>
+            <small class="small-info" v-if="enable_discount_type=='percentage'">Percentage Discount e.g. 2%</small><small class="small-info" v-else>Fixed Amount Discount</small>
             <fg-input
                  type="number" min="1" step="any" 
                   label="Tax"
                   placeholder="Tax"
                   v-model="info.tax"
+                  v-if="enable_tax"
+                  @input.native="tax"
             />
-
+            <small class="small-info" v-if="enable_tax_type=='percentage'">Percentage Tax e.g. 2%</small><small class="small-info" v-else>Percentage Amount Tax</small>
       <h2 id="grand-total">Total: {{currency_label}}{{ Number(info.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</h2>
       <div style="clear:both;">&nbsp;</div>
        <p-button type="info" round @click.native.prevent="addTransact" id="add-transact" v-show="btn_type == 'add'" v-if="add_btn">
@@ -246,6 +248,7 @@ import store from '@/store';
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 import Swal from 'sweetalert2';
+import { parse } from "path";
 
 export default {
   components:{
@@ -316,7 +319,12 @@ export default {
       input_name: '',
       currency_label: '',
       total: 0,
-      cashError:''
+      cashError:'',
+      enable_discount: false,
+      enable_tax: false,
+      enable_discount_type: '',
+      enable_tax_type: '',
+      discounted: 0
     }
   },
   computed:{
@@ -681,15 +689,36 @@ export default {
       return `${formattedHours}:${formattedMinutes}`;
     },
     price: function () {
-          let total = 0;
-          var p = this.services;
-          for (var key in p) {
-              if (p.hasOwnProperty(key)) {
-                  total = total + parseFloat(p[key].price);
-              }
-          }
+      let total = 0;
+      var p = this.services;
+      for (var key in p) {
+        if (p.hasOwnProperty(key)) {
+          total += parseFloat(p[key].price || 0);
+        }
+      }
 
-          this.info.total = total
+      // Apply discount if enabled
+      if (this.enable_discount) {
+        const discountValue = parseFloat(this.info.discount) || 0;
+        if (this.enable_discount_type === 'fixed') {
+          total -= discountValue;
+        } else if (this.enable_discount_type === 'percentage') {
+          total -= total * (discountValue / 100);
+        }
+      }
+
+      // Apply tax if enabled (optional, based on your requirements)
+        // Then calculate tax
+      if (this.enable_tax) {
+        const taxValue = parseFloat(this.info.tax) || 0;
+        if (this.enable_tax_type === 'fixed') {
+          total -= taxValue;
+        } else if (this.enable_tax_type === 'percentage') {
+          total -= total * (taxValue / 100);
+        }
+      }
+
+      this.info.total = Math.max(total, 0); // Ensure total doesn't go negative
     },
     isNumber(value) {
         return typeof value === 'number';
@@ -869,6 +898,21 @@ export default {
          this.info.total = ''
          this.services = []
          this.selectedClient = '' 
+      },
+      formatTime(timeStr) {
+        const [hoursStr, minutesStr] = timeStr.split(':');
+        let hours = parseInt(hoursStr, 10);
+        const period = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours || 12; // Convert 0 (midnight) to 12
+        const formattedHours = hours.toString().padStart(2, '0');
+        return `${formattedHours}:${minutesStr} ${period}`;
+      },
+      discount() {
+        this.price(); // Recalculate total when discount changes
+      },
+      tax() {
+        this.price(); // Recalculate when tax changes
       }
 
   },
@@ -881,6 +925,10 @@ export default {
       this.fetchServiceOptions('',0);
       const plainSettings = JSON.parse(JSON.stringify(this.settings));
       this.currency_label = plainSettings.currency_symbol;
+      this.enable_discount = !!Number(plainSettings.enable_discount);
+      this.enable_tax = !!Number(plainSettings.enable_tax);
+      this.enable_discount_type = plainSettings.enable_discount_type;
+      this.enable_tax_type = plainSettings.enable_tax_type
   }
 };
 </script>
@@ -916,6 +964,7 @@ export default {
 .trash-service{float: right; margin-top: 11px;}
 #page-transactions .mx-input{padding: 20px; margin-left: 10px;}
 #cancel{float: right; margin-right:5px;}
+.small-info{display: block; margin-bottom: 20px;}
 
 @media (max-width: 768px) {
   .filter-gen{flex: none!important;  max-width: 100%!important;}

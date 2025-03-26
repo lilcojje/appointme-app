@@ -8,7 +8,7 @@
               <div class="col-6">
                 <input type="text" v-model="search_value" placeholder="Search" @input="search" id="search">
               </div>
-              <div class="col-6">
+              <div class="col-6 add-btn-wrap">
                 <p-button type="info" round @click.native.prevent="modalAddUser" id="add-user" v-show="userData.permissions.includes('add_users')">
                   Add User
                 </p-button>
@@ -21,16 +21,16 @@
             <table class="table table-striped tbl-style" id="user-tbl">
               <thead>
                 <th style="text-align: center;">First Name</th>
-                <th style="text-align: center;">Last Name</th>
-                <th style="text-align: center;">Email</th>
+                <th style="text-align: center;" class="hide-to-mobile">Last Name</th>
+                <th style="text-align: center;" class="hide-to-mobile">Email</th>
                 <th style="text-align: center;">Role</th>
                 <th style="text-align: center;" class="action">Action</th>
               </thead>
               <tbody v-if="users.total > 0">
                 <tr v-for="(user, index) in users.data" :key="index">
                   <td style="text-align: center;">{{ user.first_name }}</td>
-                  <td style="text-align: center;">{{ user.last_name }}</td>
-                  <td style="text-align: center;">{{ user.email }}</td>
+                  <td style="text-align: center;" class="hide-to-mobile">{{ user.last_name }}</td>
+                  <td style="text-align: center;" class="hide-to-mobile">{{ user.email }}</td>
                   <td style="text-align: center;">{{ user.role.name }}</td>
                   <td style="text-align: center;" class="action">
                     <p-button type="info" round @click.native.prevent="modalEditUser(user)" v-show="userData.permissions.includes('edit_users')">
