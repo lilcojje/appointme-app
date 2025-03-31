@@ -2,16 +2,6 @@
     <div class="wrapper">
       <div id="confirm-appointment-form" v-if="!updateSuccess">
         <loader v-show="loader"/>
-        <div class="confirm-message">
-          <p>Are you sure you want to confirm appointment #{{ appointment }}?</p>
-        </div>
-        <form @submit.prevent="confirmAppointment">
-          <div class="text-center update-btn">
-            <p-button type="info" round @click.native.prevent="confirmAppointment" class="btn-front">
-              Confirm Appointment
-            </p-button>
-          </div>
-        </form>
       </div>
       <transition name="fade">
         <div v-if="updateSuccess" class="success">
@@ -51,11 +41,11 @@
     }
   },
     methods: {
-        confirmAppointment() {
+        confirmAppointment(busines_id) {
             this.loader = true;
             // Post to the endpoint using businessId and include appointment id in the payload, with authorization token in the header
-            axios.post(`${api.API_URL}/confirm-appointment/${this.user.business_id}`, {
-                appointment: this.appointment,
+            axios.post(`${api.API_URL}/confirm-appointment/${this.$route.params.id}`, {
+                appointment: this.$route.query.id,
                 confirm: 1
             }, {
                 headers: { Authorization: `Bearer ${this.token}` }
@@ -79,9 +69,7 @@
     },
     created() {
       // Extract the business id from the route parameters
-      this.businessId = this.$route.params.id;
-      // Extract the appointment id from the query parameters
-      this.appointment = this.$route.query.id;
+      this.confirmAppointment();
     }
   };
   </script>

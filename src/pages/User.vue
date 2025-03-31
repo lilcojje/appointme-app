@@ -9,10 +9,10 @@
                 <input type="text" v-model="search_value" placeholder="Search" @input="search" id="search">
               </div>
               <div class="col-6 add-btn-wrap">
-                <p-button type="info" round @click.native.prevent="modalAddUser" id="add-user" v-show="userData.permissions.includes('add_users')">
+                <p-button type="info" class="add-btns" round @click.native.prevent="modalAddUser" id="add-user" v-show="userData.permissions.includes('add_users')">
                   Add User
                 </p-button>
-                <p-button type="info" round @click.native.prevent="redirectToRoles" id="add-roles" v-show="userData.permissions.includes('view_permissions')">
+                <p-button type="info" class="add-btns" round @click.native.prevent="redirectToRoles" id="add-roles" v-show="userData.permissions.includes('view_permissions')">
                   Permissions
                 </p-button>
               </div>
@@ -488,4 +488,5 @@ export default {
 
 #add-roles { float:right; margin-right: 5px; }
 .action .btn-info { margin: 0 2px; }
+.add-btns{margin:0 2px;}
 </style>

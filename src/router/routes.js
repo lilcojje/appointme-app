@@ -107,7 +107,7 @@ const routes = [
       },
       {
         path: "availability",
-        name: "schedule availability",
+        name: "Availability",
         component: ScheduleAvailability,
         meta: {
           requiredPermission: "view_availability"
@@ -184,6 +184,11 @@ const routes = [
         path: '/admin/appointments/confirm/:id',
         name: "Confirm Appointment",
         component: ConfirmAppointment,
+      }
+      ,{
+        path: '/notifications',
+        name: "notifications",
+        component: Notifications,
       }
       
     ],

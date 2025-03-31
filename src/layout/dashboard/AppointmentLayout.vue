@@ -56,7 +56,7 @@
         </p>
       </div>
     </transition>
-    <h3 class="form-title" v-if="!isCancelView && !isView">Book Your Appointment</h3>
+    <h3 class="form-title" v-if="!isCancelView && !isView && !isRescheduled">Book Your Appointment</h3>
     <!-- New/Existing Buttons (hidden when rebooking) -->
     <transition name="fade" v-if="!isCancelView && !isRebook && !isView">
       <div id="choose" v-if="!choose_show && !success_show">
@@ -220,8 +220,8 @@
         <!-- Success Message with Appointment Info and Cancel Option -->
         <transition name="fade">
         <div id="success" v-if="success_show">
-          <h3>Your Appointment is Pending Confirmation</h3>
-          <p>Your appointment has been successfully scheduled and is now pending confirmation.</p>
+          <h3 v-if="rebooked_from">Your appointment has been rescheduled.</h3>
+          <h3 v-else>Your Appointment is Pending Confirmation</h3>
           <p><strong>Appointment ID:</strong> {{ appointment_info.appointment_id }}</p>
           <p><strong>Appointment Date:</strong> {{ formatDate(appointment_info.date) }}</p>
           <p><strong>Time:</strong> {{ appointment_info.time }}</p>
@@ -315,7 +315,8 @@ export default {
       businessProfile: {},
       minDate: this.getTodayDate(),
       time_type: '',
-      isView: false
+      isView: false,
+      rebooked_from:''
     };
   },
   computed: {
@@ -390,12 +391,7 @@ export default {
       this.isCanceled = false;
     },
     returnMain() {
-      this.choose_show = false;
-      this.choose_info = false;
-      this.choose_existing = false;
-      this.choose_found = false;
-      this.view_new = false;
-      this.resetForm();
+        window.location = '/book/' + this.$route.params.id;
     },
     chooseSearch() {
       this.loader = true;
@@ -585,7 +581,9 @@ export default {
                  if (response.data && response.data.appointment_id) {
                     self.appointment_id = response.data.appointment_id;
                   }
-                  
+
+                  this.rebooked_from = response.data.data.rebooked_from;
+
                   self.appointment_info = {
                     appointment_id: self.appointment_id,
                     date: self.info.date,
@@ -595,7 +593,7 @@ export default {
                   self.success_show = true;
                   if (typeof self.list === "function") self.list();
                   if (typeof self.closeModalAppointment === "function") self.closeModalAppointment();
-
+                  
                   self.resetForm();
               } 
 
@@ -813,6 +811,7 @@ export default {
           self.loader_save = false;
           self.dateChanged = true;
           self.time_list = data;
+          self.info.time = ''
           return data;
         })
         .catch(({ response }) => {

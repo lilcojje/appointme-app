@@ -12,7 +12,7 @@
           </button>
         </div>
       </transition>
-      <button @click="redirectToDashboard" class="subscribe-btn">
+      <button @click="redirectToDashboard" class="subscribe-btn" v-if="!subscriptionSuccess" c>
            Back to Dashboard
         </button>
       <h3 class="heading-details" v-if="!subscriptionSuccess">Choose Your Subscription</h3>
@@ -173,7 +173,9 @@
                     .post(
                       `${api.API_URL}/paypal-cancel`,
                       {
-                        subscription_id: this.user.subscription.paypal_subscription_id,
+                        subscription_id: 
+                        this.user.subscription.paypal_subscription_id,
+                        user_id: this.user.id
                       },
                       {
                         headers: { Authorization: `Bearer ${this.token}` }

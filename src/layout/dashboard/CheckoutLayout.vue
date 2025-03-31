@@ -4,6 +4,10 @@
         <img src="@/assets/img/logo.png" id="logo" />
       </div>
   
+      <button @click="redirectToSubscription" class="dashboard-button">
+            Go to Subscription
+      </button>
+
       <!-- Success message after payment is completed -->
       <div v-if="checkoutSuccess" class="success-message">
         Payment completed successfully!
@@ -129,6 +133,9 @@
       },
       redirectToDashboard() {
         this.$router.push("/dashboard");
+      },
+      redirectToSubscription(){
+        this.$router.push("/subscription");
       }
     }
   };
@@ -265,21 +272,22 @@
   }
   
   .dashboard-button {
-    background-color: var(--primary-color);
+    background-color: #007bff;
     color: #fff;
     border: none;
-    padding: 14px 30px;
-    border-radius: 30px;
-    font-size: 1em;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    margin-top: 20px;
-  }
-  .dashboard-button:hover {
-    background-color: #1a252f;
-    transform: scale(1.03);
+    transition: background-color 0.3s ease;
+    margin-top: 16px;
   }
   
+  .dashboard-button:hover {
+    background-color: #0056b3;
+  }
+
+
   @media (max-width: 768px) {
     .checkout-details,
     .success-message {

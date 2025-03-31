@@ -1,6 +1,86 @@
 <template>
   <div id="page-dashboard">
-    <loader v-if="loader"/> 
+    <loader v-if="loader"/>
+    <card title="Today's Appointment">
+        <div slot="raw-content" class="table-responsive">
+          <table class="table table-striped" id="appoint-tbl">
+            <thead> 
+              <th>Time</th>
+              <th>First Name</th>
+              <th>Services</th>
+              <th>Status</th>
+            </thead>
+            <tbody v-if="paginatedTodaysAppointments.length > 0">
+              <tr v-for="(appointment, index) in paginatedTodaysAppointments" :key="index">
+                <td>{{ formatTime(appointment.appointment_time) }}</td>
+                <td>{{ appointment.client ? appointment.client.first_name : 'N/A' }}</td>
+                <td>{{ appointment.formated_service }}</td>
+                <td><span class="status" :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
+                      {{ appointment.status }}
+                    </span></td>
+              </tr>
+            </tbody>
+            <tbody v-else>
+              <tr>
+                <td align="center" colspan="4">No Appointment.</td>
+              </tr>
+            </tbody>
+          </table>
+           <!-- Pagination Controls BELOW the Table -->
+          <div class="pagination-controls">
+            <button @click="prevPage('today')" :disabled="todayPage === 1" class="pagination-btn">
+              ◀
+            </button>
+            <span>Page {{ todayPage }} of {{ totalTodayPages }}</span>
+            <button @click="nextPage('today')" :disabled="todayPage >= totalTodayPages" class="pagination-btn">
+              ▶
+            </button>
+          </div>
+        </div>
+      </card>
+
+      <card title="Upcoming Appointments">
+        <div slot="raw-content" class="table-responsive">
+          <table class="table table-striped" id="appoint-tbl">
+            <thead> 
+              <th>Date<span class="hide-desktop"> Time</span></th>
+              <th class="hide-to-mobile">Time</th>
+              <th>First Name</th>
+              <th>Services</th>
+              <th>Status</th>
+            </thead>
+            <tbody v-if="paginatedUpcomingAppointments.length > 0">
+              <tr v-for="(appointment, index) in paginatedUpcomingAppointments" :key="index">
+                <td>{{ formatDate(appointment.appointment_date) }}<span class="hide-desktop">{{ appointment.formated_service }}</span></td>
+                <td class="hide-to-mobile">{{ formatTime(appointment.appointment_time) }}</td>
+                <td>{{ appointment.client ? appointment.client.first_name : 'N/A' }}</td>
+                <td>{{ appointment.formated_service }}</td>
+                <td><span class="status" :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
+                      {{ appointment.status }}
+                    </span>
+                </td>
+              </tr>
+            </tbody>
+            <tbody v-else>
+              <tr>
+                <td align="center" colspan="4">No Appointment.</td>
+              </tr>
+            </tbody>
+          </table>
+           <!-- Pagination Controls BELOW the Table -->
+          <div class="pagination-controls">
+            <button @click="prevPage('upcoming')" :disabled="upcomingPage === 1" class="pagination-btn">
+              ◀
+            </button>
+            <span>Page {{ upcomingPage }} of {{ totalUpcomingPages }}</span>
+            <button @click="nextPage('upcoming')" :disabled="upcomingPage >= totalUpcomingPages" class="pagination-btn">
+              ▶
+            </button>
+          </div>
+        </div>
+       
+      </card>
+
     <h4>Today's Insights</h4>
     <div class="row">
       <div class="col-md-6 col-xl-3">
@@ -108,89 +188,6 @@
         </div>
       </div>
     </div>
-    <card title="Today's Appointment">
-        <div slot="raw-content" class="table-responsive">
-          <table class="table table-striped" id="appoint-tbl">
-            <thead> 
-              <th>Time</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Status</th>
-            </thead>
-            <tbody v-if="paginatedTodaysAppointments.length > 0">
-              <tr v-for="(appointment, index) in paginatedTodaysAppointments" :key="index">
-                <td>{{ formatTime(appointment.appointment_time) }}</td>
-                <td>{{ appointment.client ? appointment.client.first_name : 'N/A' }}</td>
-                <td>{{ appointment.client ? appointment.client.last_name : 'N/A' }}</td>
-                <td><span class="status" :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
-                      {{ appointment.status }}
-                    </span></td>
-              </tr>
-            </tbody>
-            <tbody v-else>
-              <tr>
-                <td align="center" colspan="4">No Appointment.</td>
-              </tr>
-            </tbody>
-          </table>
-           <!-- Pagination Controls BELOW the Table -->
-          <div class="pagination-controls">
-            <button @click="prevPage('today')" :disabled="todayPage === 1" class="pagination-btn">
-              ◀
-            </button>
-            <span>Page {{ todayPage }} of {{ totalTodayPages }}</span>
-            <button @click="nextPage('today')" :disabled="todayPage >= totalTodayPages" class="pagination-btn">
-              ▶
-            </button>
-          </div>
-        </div>
-
-       
-      </card>
-
-    
-
-      <card title="Upcoming Appointments">
-        <div slot="raw-content" class="table-responsive">
-          <table class="table table-striped" id="appoint-tbl">
-            <thead> 
-              <th>Date</th>
-              <th>Time</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Status</th>
-            </thead>
-            <tbody v-if="paginatedUpcomingAppointments.length > 0">
-              <tr v-for="(appointment, index) in paginatedUpcomingAppointments" :key="index">
-                <td>{{ formatDate(appointment.appointment_date) }}</td>
-                <td>{{ formatTime(appointment.appointment_time) }}</td>
-                <td>{{ appointment.client ? appointment.client.first_name : 'N/A' }}</td>
-                <td>{{ appointment.client ? appointment.client.last_name : 'N/A' }}</td>
-                <td><span class="status" :style="{ backgroundColor: getStatusColor(appointment.status), color: '#fff', padding: '5px 10px', borderRadius: '5px' }">
-                      {{ appointment.status }}
-                    </span>
-                </td>
-              </tr>
-            </tbody>
-            <tbody v-else>
-              <tr>
-                <td align="center" colspan="4">No Appointment.</td>
-              </tr>
-            </tbody>
-          </table>
-           <!-- Pagination Controls BELOW the Table -->
-          <div class="pagination-controls">
-            <button @click="prevPage('upcoming')" :disabled="upcomingPage === 1" class="pagination-btn">
-              ◀
-            </button>
-            <span>Page {{ upcomingPage }} of {{ totalUpcomingPages }}</span>
-            <button @click="nextPage('upcoming')" :disabled="upcomingPage >= totalUpcomingPages" class="pagination-btn">
-              ▶
-            </button>
-          </div>
-        </div>
-       
-      </card>
 
     <h4>Insights</h4>
 
@@ -380,8 +377,26 @@ export default {
         this.totalPending = response.data.total_pending;
         this.totalCompleted = response.data.total_completed;
         this.totalCancelled = response.data.total_cancelled;
+
+        response.data.todays_appointments.data.forEach((appointment) => {
+          appointment.formated_service =
+            Array.isArray(appointment.services) && appointment.services.length
+              ? appointment.services.join(", ")
+              : "No Service";
+        });
+
+        response.data.upcoming_appointments.data.forEach((appointment) => {
+          appointment.formated_service =
+            Array.isArray(appointment.services) && appointment.services.length
+              ? appointment.services.join(", ")
+              : "No Service";
+        });
+
+
        
         this.todaysAppointments = response.data.todays_appointments.data || [];
+
+
         this.upcomingAppointments = response.data.upcoming_appointments.data || [];
 
         // Reset pagination when new data loads

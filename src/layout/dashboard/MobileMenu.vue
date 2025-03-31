@@ -2,7 +2,6 @@
   <ul class="nav navbar-nav nav-mobile-menu">
     <h5 id="fullname" @click="profile"><span class="ti-user"></span>{{ fullname }}</h5>
    <!--<h5 id="subscribe-to" @click="subscription"><span class="ti-medall"></span><span  v-if="user.subscription.plan=='free'" class="subsc">Upgrade Pro</span><span class="subsc" v-else>(PRO)</span></h5>-->
-    <h5 @click="viewForm" id="viewForm"><span class="ti-eye" v-if="enableBooking"></span>View Form</h5>
     <slot></slot>
   </ul>
 </template>

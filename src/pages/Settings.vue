@@ -126,6 +126,21 @@
           Enable tax to sales transaction.
         </p>
       </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" v-model="settings.allow_last_minute_booking"  @change="enable_last_booking($event.target.checked)" />
+          Allow Last Minute Booking
+        </label>
+        <p class="item-description">
+          Enable this option to allow customers to book appointments at the last minute, bypassing any advance notice restrictions.
+        </p>
+      </div>
+      <div class="form-group" v-if="enable_last_booking_opt">
+        <label>
+          <input type="text" v-model="settings.allow_last_minute_buffer" />
+          Last Minute Buffer
+        </label>
+      </div>
       <button @click="updateSettings">Save Settings</button>
     </div>
 
@@ -187,6 +202,8 @@ export default {
         enable_discount: false,
         enable_discount_type:'',
         enable_tax_type:'',
+        allow_last_minute_booking:'',
+        allow_last_minute_buffer:'',
       },
       IMG_URL: '',
       timeZones: [],
@@ -204,6 +221,7 @@ export default {
       loader_save: false,
       enable_discount_opt: false,
       enable_tax_opt: false,
+      enable_last_booking_opt:false
     };
   },
   computed:{
@@ -238,12 +256,13 @@ export default {
           data.enable_booking = !!Number(data.enable_booking);
           data.enable_discount = !!Number(data.enable_discount);
           data.enable_tax = !!Number(data.enable_tax);
+          data.allow_last_minute_booking = !!Number(data.allow_last_minute_booking);
           data.currency_code = this.currencyList.find(
               currency => currency.code === data.currency_code
             );
           this.enable_discount_opt = !!Number(data.enable_discount);
           this.enable_tax_opt = !!Number(data.enable_tax);
-          
+          this.enable_last_booking_opt = !!Number(data.allow_last_minute_booking);
           this.settings = response.data;
         });
     },
@@ -384,7 +403,9 @@ export default {
     enable_tax_choices(value){
       this.enable_tax_opt = value;
     },
-    
+    enable_last_booking(value){
+      this.enable_last_booking_opt = value;
+    },
   }
 };
 </script>
