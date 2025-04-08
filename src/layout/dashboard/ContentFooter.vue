@@ -1,6 +1,6 @@
 <template>
   <footer class="footer">
-    <div class="container-fluid d-flex flex-wrap justify-content-between">
+    <div class="container-fluid d-flex flex-wrap justify-content-between footer-nav">
       <nav>
         <ul>
           <li>
@@ -23,4 +23,17 @@
 <script>
 export default {};
 </script>
-<style></style>
+<style>
+@media (max-width: 768px) {
+  .footer .footer-nav{justify-content: center!important; align-items: center!important;}
+  .footer nav ul li{display: block!important;}
+  .footer .copyright {
+      padding: 20px 15px 60px 0!important;
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+    align-items: center;
+  }
+}
+
+</style>

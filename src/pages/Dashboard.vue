@@ -459,7 +459,28 @@ export default {
     },
     redirectTo(redirect) {
         this.$router.push("/"+redirect);
-      }
+      },
+    updateFcm() {
+      const fcm = localStorage.getItem('fcm'); // Get FCM from localStorage
+
+      axios.post(api.API_URL + '/fcm-update', 
+          {
+              user_id: this.user.id,  // Add user_id in the post parameter
+              fcm: fcm // Add FCM token
+          }, 
+          {
+              headers: { Authorization: `Bearer ${this.token}` }
+          }
+      )
+      .then((data) => {
+          // Handle success response
+      })
+      .catch((response) => {
+          if (response.data.error.code === 'token_could_not_verified') {
+              this.$router.push({ name: 'login' });
+          }
+      });
+  }
   },
   mounted() {
     // console.log(this.$store.state.user);
@@ -467,6 +488,9 @@ export default {
     this.fetchDashboardData();
     const plainSettings = JSON.parse(JSON.stringify(this.settings));
     this.currency_label = plainSettings.currency_symbol;
+  },
+  created(){
+     this.updateFcm();
   }
 };
 </script>
@@ -535,7 +559,6 @@ export default {
 .select-client {
   display: block;
   margin-bottom: 20px;
-  width: 128px;
 }
 .back-home {
   margin-bottom: 20px;
@@ -559,7 +582,6 @@ export default {
 }
 .time-list {
   display: block;
-  width: 128px;
 }
 .gluata-services {
   margin-top: 20px;

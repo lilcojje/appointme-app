@@ -43,6 +43,9 @@
           <a class="dropdown-item text-center view-all" href="/notifications">
             View All Notifications
           </a>
+          <a class="dropdown-item text-center view-all" @click="requestNotification">
+            Enable Notifications
+          </a>
         </div>
       </drop-down>
       <a class="nav-link" id="view-form" @click="viewForm" v-if="enableBooking"><span class="ti-eye"></span>View Form</a>
@@ -190,6 +193,15 @@ export default {
       this.pollInterval = setInterval(() => {
         this.fetchNotifications();
       }, 30000); // Poll every 5 minutes
+    },
+    requestNotification() {
+      if (Notification.permission === "default") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            new Notification("You have enabled notifications!");
+          }
+        });
+      }
     }
    
   },

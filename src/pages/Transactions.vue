@@ -139,8 +139,9 @@
               @input="serviceChanged(service, index)"
               class="services_input"
             ></multiselect>
-            <span class="cur_label">{{currency_label}}</span>
+            <span class="cur_label"><span v-if="service.price">Price: {{currency_label}}</span>{{service.price}}</span>
             <input
+              type="hidden"
               v-model="service.price"
               placeholder="Price"
               class="w-full py-2 border border-indigo-500 rounded prices-input"
@@ -965,6 +966,7 @@ export default {
 #page-transactions .mx-input{padding: 20px; margin-left: 10px;}
 #cancel{float: right; margin-right:5px;}
 .small-info{display: block; margin-bottom: 20px;}
+.cur_label{font-weight: bold;}
 
 @media (max-width: 768px) {
   .filter-gen{flex: none!important;  max-width: 100%!important;}

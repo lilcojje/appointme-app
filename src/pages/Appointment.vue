@@ -153,7 +153,7 @@
         <fg-input v-model="info.email" label="Email" placeholder="Email" />
       </div>
 
-      <fg-input type="date" placeholder="Date" v-model="info.date" @change.native="changeDate" :min="minDate" />
+      <fg-input type="date" label="Select Date" placeholder="Date" v-model="info.date" @change.native="changeDate" :min="minDate" />
 
       <div class="form-group" v-if="timeType=='auto'">
                       <label class="control-label">Select Time</label>
@@ -505,6 +505,15 @@ export default {
         self.notifyVue("top", "center", "danger", "Please select at least one service", "ti-hand-stop");
         return;
       }
+
+      if(this.client_type	=='existing'){
+        alert(info.email)
+        self.info.first_name = "";
+        self.info.last_name = "";
+        self.info.contact_number = "";
+         self.info.email = "";
+      }
+      
       
       this.loader_save = true;
       axios
@@ -823,6 +832,10 @@ export default {
       } else if (event.target.value === "existing") {
         this.view_new = false;
         this.view_existing = true;
+        this.info.first_name = ''
+        this.info.last_name = ''
+        this.info.email = ''
+        this.info.contact_number = ''
       }
     },
     getLabel(item) {
@@ -1314,7 +1327,6 @@ export default {
 .select-client {
   display: block;
   margin-bottom: 20px;
-  width: 128px;
 }
 .back-home {
   margin-bottom: 20px;
@@ -1338,7 +1350,6 @@ export default {
 }
 .time-list {
   display: block;
-  width: 128px;
 }
 .gluata-services {
   margin-top: 20px;

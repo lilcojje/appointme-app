@@ -153,8 +153,9 @@ export default {
       // For example, if your user object stores permissions under "role.permissions",
       // you might use: this.user.role && this.user.role.permissions.some(...)
       return this.user.permissions && this.user.permissions.some(p => p === permission);
+    }
+
     },
-  },
   created(){
     this.role_name = this.user.role_name;
   }
