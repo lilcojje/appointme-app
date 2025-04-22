@@ -102,6 +102,7 @@ import axios from 'axios'
 import Loader from "@/components/Loader";
 import Modal from '@/components/Modal';
 import Paginate from 'vuejs-paginate';
+import store from '@/store';
 
 export default {
   components: {
@@ -174,6 +175,7 @@ export default {
         const response = await axios.post(api.API_URL + '/roles', {
           name: this.roleInfo.name,
           business_id: this.user.business_id,
+          user_id: this.user.id,
           permissions: this.roleInfo.selectedPermissions
         }, {
           headers: { Authorization: `Bearer ${this.token}` }
@@ -186,6 +188,10 @@ export default {
         });
         this.closeModalRole();
         this.list();
+
+        store.commit('setUser', response.data.user); 
+        store.commit('setSettings', response.data.user.settings);
+
       } catch (error) {
         this.handleApiError(error);
       } finally {
@@ -198,9 +204,10 @@ export default {
 
       this.loader_save = true;
       try {
-        await axios.put(api.API_URL + `/roles/${this.roleInfo.id}`, {
+        const response = await axios.put(api.API_URL + `/roles/${this.roleInfo.id}`, {
           name: this.roleInfo.name,
-          permissions: this.roleInfo.selectedPermissions
+          permissions: this.roleInfo.selectedPermissions,
+          user_id: this.user.id
         }, {
           headers: { Authorization: `Bearer ${this.token}` }
         });
@@ -212,13 +219,17 @@ export default {
         });
         this.closeModalRole();
         this.list();
+
+        store.commit('setUser', response.data.user); 
+        store.commit('setSettings', response.data.user.settings);
+
       } catch (error) {
         this.handleApiError(error);
       } finally {
         this.loader_save = false;
       }
     },
-
+    
     validateRoleForm() {
       if (!this.roleInfo.name.trim()) {
         this.$notify({

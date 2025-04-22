@@ -1375,7 +1375,7 @@ export default {
   color: red;
 }
 #top-tool-bar .mx-datepicker-range {
-  width: 220px;
+  width: 242px;
   margin-right: 15px;
 }
 a.fc-event {

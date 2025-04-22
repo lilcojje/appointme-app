@@ -276,7 +276,7 @@ export default {
       this.reportData = null;
     },
     async generateReport() {
-      if(this.user.subscription.plan === "free"){
+      if (this.user.subscription && this.user.subscription.plan === "free") {
           Swal.fire({
               icon: 'warning',
               title: 'Upgrade Required',

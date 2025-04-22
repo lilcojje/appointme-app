@@ -49,7 +49,7 @@
         </div>
       </drop-down>
       <a class="nav-link" id="view-form" @click="viewForm" v-if="enableBooking"><span class="ti-eye"></span>View Form</a>
-      <a class="nav-link-sub" @click="subscription" id="sub-link" ><span  v-if="user.subscription.plan=='free'" class="subsc">Upgrade Pro</span><span class="subsc" v-else>(PRO)</span></a>
+      <a class="nav-link-sub" @click="subscription" id="sub-link" ><span  v-if="!user.subscription || user.subscription.plan === 'free'" class="subsc">Upgrade Pro</span><span class="subsc" v-else>(PRO)</span></a>
       <drop-down
           class="nav-item"
           :title="fullname"
@@ -208,7 +208,7 @@ export default {
   created(){
     this.fullname = this.user.first_name + ' ' ;
 
-    if(this.user.subscription.status == 'failed'){
+    if (this.user.subscription && this.user.subscription.status === 'failed') {
       Swal.fire({
                     icon: 'error',
                     title: 'Paypal Payment Failed',

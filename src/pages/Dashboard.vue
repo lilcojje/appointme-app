@@ -203,9 +203,11 @@
                     </div>
                   </div>
                   <div class="col-7">
-                    <div class="numbers">
-                      <p>Subscription</p> <span class="sml-desc">{{ user.subscription.plan }}</span>
+                    <div class="numbers" v-if="user.subscription && user.subscription.plan">
+                      <p>Subscription</p>
+                      <span class="sml-desc">{{ user.subscription.plan }}</span>
                     </div>
+
                   </div>
                 </div>
                 <div>

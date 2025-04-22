@@ -18,50 +18,6 @@
               <span v-if="errors.business_name" class="error">{{ errors.business_name }}</span>
             </div>
           </div>
-          <div class="row">
-            <div class="col-md-12">
-              <fg-input
-                type="email"
-                label="Business Email:"
-                placeholder="Enter Business Email"
-                v-model="business_email"
-              ></fg-input>
-              <span v-if="errors.business_email" class="error">{{ errors.business_email }}</span>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <fg-input
-                type="text"
-                label="Business Address:"
-                placeholder="Enter Business Addresss"
-                v-model="business_address"
-              ></fg-input>
-              <span v-if="errors.business_address" class="error">{{ errors.business_address }}</span>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <fg-input
-                type="text"
-                label="Business Phone Number:"
-                placeholder="Enter Business Phone Number"
-                v-model="business_phone"
-              ></fg-input>
-              <span v-if="errors.business_phone" class="error">{{ errors.business_phone }}</span>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <fg-input
-                type="textarea"
-                label="Business Description:"
-                placeholder="Enter Business Description"
-                v-model="business_description"
-              ></fg-input>
-              <span v-if="errors.business_description" class="error">{{ errors.business_description }}</span>
-            </div>
-          </div>
           <div class="form-group">
             <label>Time Zone:</label>
             <multiselect
@@ -86,7 +42,7 @@
           </div>
           <div class="text-center update-btn">
             <p-button type="info" round @click.native.prevent="validateForm">
-              Update Profile
+              Update 
             </p-button>
           </div>
           <div class="text-center backto">
@@ -270,12 +226,6 @@ export default {
     validateForm() {
       this.errors = {};
       if (!this.business_name) this.errors.business_name = "Business name is required";
-      if (!this.business_email) this.errors.business_email = "Business email is required";
-      else if (!/.+@.+\..+/.test(this.business_email)) this.errors.business_email = "Invalid email format";
-      if (!this.business_address) this.errors.business_address = "Business address is required";
-      if (!this.business_phone) this.errors.business_phone = "Business phone number is required";
-      if (!this.business_description) this.errors.business_description = "Business description is required";
-      
       if (Object.keys(this.errors).length === 0) {
         this.updateProfile();
       }

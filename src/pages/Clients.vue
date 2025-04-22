@@ -12,6 +12,9 @@
                 <p-button type="info" round @click.native.prevent="modalAddClient" id="add-client" v-show="user.permissions.includes('add_clients')">
                   Add Client
                 </p-button>
+                <p-button type="info" round @click.native.prevent="exportClients" id="export-clients" v-show="user.permissions.includes('export_clients')">
+                  Export
+                </p-button>
               </div>
             </div>
             <loader v-if="loader"/>
@@ -470,7 +473,37 @@ export default {
         this.info.last_name = '';
         this.info.email = '';
         this.info.contact_number = '';
-      }
+      },
+      async exportClients() {
+        try {
+            const response = await axios.get(api.API_URL + '/clients/export', {
+                params: {
+                    search: this.search_value,
+                    business_id: this.user.business_id
+                },
+                headers: { 
+                    Authorization: `Bearer ${this.token}`
+                },
+                responseType: 'blob' // Correct placement here
+            });
+
+            // Create download link
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'clients.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            
+            // Cleanup
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(link);
+
+        } catch (error) {
+            console.error('Export failed:', error);
+            this.notifyVue('top', 'center', 'danger', 'Export failed. Please try again.', 'ti-hand-stop');
+        }
+    }
   },
   created() {
     this.list();
@@ -513,9 +546,18 @@ export default {
   padding: 5px; 
   color: #fff!important;
 }
+
 #add-client {
   float:right;
 }
+
+#export-clients {
+  float: right;
+  margin-right: 10px;
+  background-color: #106c9c;
+  border-color: #106c9c;
+}
+
 #no-record {
   font-weight: bold; 
   font-size: 20px;

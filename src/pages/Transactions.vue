@@ -5,7 +5,7 @@
       <card>
         <div slot="raw-content" class="table-responsive">
           <div class="row" id="top-tool-bar">
-            <div class="col-8 filter-gen">
+            <div class="col-9 filter-gen">
               <!-- New client name filter input -->
               <multiselect
                 v-model="selectedClientSearch"
@@ -21,11 +21,12 @@
             </multiselect>
               <date-picker v-model="date_range" placeholder="Select date range" range></date-picker>
               <p-button type="info" round @click.native.prevent="generate" id="generate">
-                Generate
+                Filter
               </p-button>
+              <p-button type="info" round @click.native.prevent="exportToExcel" id="export" v-show="user.permissions.includes('export_transactions')">Export</p-button>
               <div style="clear:both; height: 0;"></div>
             </div>
-            <div class="col-4 trans mbl">
+            <div class="col-3 trans mbl">
               <p-button type="info" round @click.native.prevent="modalAddTransact" id="add-transact">
                 Add Sales
               </p-button>
@@ -201,14 +202,16 @@
             <div v-if="cashError" class="error-message">{{ cashError }}</div>
           <h4>Change: {{ info.change.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</h4>  
         </div>
-
-        <fg-input
+        <div v-if="enable_discount">
+          <fg-input
                type="number" min="1" step="any" 
                   label="Discount"
                   placeholder="Discount"
                   v-model="info.discount"
-             v-if="enable_discount" @input.native="discount"/>
+              @input.native="discount"/>
             <small class="small-info" v-if="enable_discount_type=='percentage'">Percentage Discount e.g. 2%</small><small class="small-info" v-else>Fixed Amount Discount</small>
+        </div>
+        <div v-if="enable_discount">   
             <fg-input
                  type="number" min="1" step="any" 
                   label="Tax"
@@ -218,6 +221,7 @@
                   @input.native="tax"
             />
             <small class="small-info" v-if="enable_tax_type=='percentage'">Percentage Tax e.g. 2%</small><small class="small-info" v-else>Percentage Amount Tax</small>
+          </div>
       <h2 id="grand-total">Total: {{currency_label}}{{ Number(info.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</h2>
       <div style="clear:both;">&nbsp;</div>
        <p-button type="info" round @click.native.prevent="addTransact" id="add-transact" v-show="btn_type == 'add'" v-if="add_btn">
@@ -914,6 +918,76 @@ export default {
       },
       tax() {
         this.price(); // Recalculate when tax changes
+      },
+      async exportToExcel() {
+        this.loader_save = true;
+        try {
+          const params = {
+            business_id: this.user.business_id,
+          };
+
+          // Add client filter if selected
+          if (this.selectedClientSearch && this.selectedClientSearch.id) {
+            params.client_id = this.selectedClientSearch.id;
+          }
+
+          // Add date filters if date_range is selected
+          if (this.date_range && this.date_range.length >= 2) {
+            const startDate = new Date(this.date_range[0]);
+            const endDate = new Date(this.date_range[1]);
+
+            params.from = startDate.toLocaleDateString("en-US", {
+              month: "2-digit",
+              day: "2-digit",
+              year: "numeric"
+            });
+            params.to = endDate.toLocaleDateString("en-US", {
+              month: "2-digit",
+              day: "2-digit",
+              year: "numeric"
+            });
+          }
+
+          const response = await axios.get(api.API_URL + '/transactions/export', {
+            params: params,
+            responseType: 'blob',
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          // Create download link
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'transactions.xlsx');
+          document.body.appendChild(link);
+          link.click();
+          
+          // Cleanup
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+          if (error.response && error.response.data instanceof Blob) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const errorData = JSON.parse(reader.result);
+              this.showError(errorData.message || 'Export failed');
+            };
+            reader.readAsText(error.response.data);
+          } else {
+            this.showError('Failed to export transactions');
+          }
+        } finally {
+          this.loader_save = false;
+        }
+      },
+      showError(message) {
+        // Implement your error display logic
+        console.error(message);
+        alert(message);
       }
 
   },
@@ -952,7 +1026,7 @@ export default {
 .add-services{margin-top:30px;}
 .cash-label{font-weight: bold; font-size: 18px; margin-right: 10px;}
 #client-notes{width:100%;}
-#generate{margin-left: 10px;}
+#generate{margin-left: 10px; margin-right: 3px;}
 .report-text-head{padding-left: 16px; font-size: 16px;}
 .client-search{display: inline-block; width: 45%;}
 .back-home{margin-bottom: 20px; background: #106c9c; color:#fff; border:none;}
@@ -974,5 +1048,6 @@ export default {
   #page-transactions #top-tool-bar{text-align: center;}
   .mbl{margin-top:20px; flex: none!important;  max-width: 100%!important;}
   #page-transactions .mx-input{margin-left: 0px!important;}
+  .pagination{justify-content: center;}
 }
 </style>
