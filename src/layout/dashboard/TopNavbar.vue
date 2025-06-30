@@ -49,7 +49,7 @@
         </div>
       </drop-down>
       <a class="nav-link" id="view-form" @click="viewForm" v-if="enableBooking"><span class="ti-eye"></span>View Form</a>
-      <a class="nav-link-sub" @click="subscription" id="sub-link" ><span  v-if="!user.subscription || user.subscription.plan === 'free'" class="subsc">Upgrade Pro</span><span class="subsc" v-else>(PRO)</span></a>
+      <a class="nav-link-sub" @click="subscription" id="sub-link" v-if="user.owner==1"><span  v-if="!user.subscription || user.subscription.plan === 'free'" class="subsc">Upgrade Pro</span><span class="subsc" v-else>(PRO)</span></a>
       <drop-down
           class="nav-item"
           :title="fullname"
@@ -60,6 +60,7 @@
           <a class="dropdown-item" @click="profile">Profile</a>
           <a class="dropdown-item" @click="subscription" v-if="user.owner==1">Subscription</a>
           <a class="dropdown-item" href="mailto:support@apppointme.tech">Support</a>
+          <a class="dropdown-item" target="_blank" href="https://appointme.tech/help">Help</a>
           <a class="dropdown-item" @click="logout">Logout</a>
         </drop-down>
         <button
@@ -141,11 +142,12 @@ export default {
                          localStorage.clear();
                          this.$store.dispatch('clearStore');
 
-                        this.$router.push({name: 'login'})
+                        //this.$router.push({name: 'login'})
+                        window.location.href = '/login';
                     })
                     .catch((response) => {
                           if(response.data.error.code =='token_could_not_verified'){
-                            this.$router.push({name: 'login'})
+                            window.location.href = '/login';
                           }
                     });
     },

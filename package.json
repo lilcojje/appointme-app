@@ -15,6 +15,8 @@
     "@capacitor/camera": "^5.0.10",
     "@capacitor/core": "^5.7.4",
     "@capacitor/push-notifications": "^5.1.1",
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fullcalendar/core": "^6.1.15",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/vue": "^6.1.11",

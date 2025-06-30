@@ -189,9 +189,9 @@
       </div>
     </div>
 
-    <h4>Insights</h4>
+    <h4 v-if="user.role_name=='admin'">Insights</h4>
 
-    <div class="row">
+    <div class="row" v-if="user.role_name=='admin'">
       <div class="col-md-6 col-xl-3">
         <div class="card" @click="redirectTo('subscription')">
             <div class="card-body">
@@ -407,7 +407,7 @@ export default {
       } catch (error) {
         if (error.response && error.response.data.error.code === 'token_could_not_verified') {
           localStorage.removeItem("token");
-          this.$router.push('/login');
+          window.location.href = '/login';
         }
       } finally {
         this.loader = false;
@@ -479,7 +479,7 @@ export default {
       })
       .catch((response) => {
           if (response.data.error.code === 'token_could_not_verified') {
-              this.$router.push({ name: 'login' });
+              window.location.href = '/login';
           }
       });
   }

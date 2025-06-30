@@ -40,6 +40,7 @@
       </div>
       <div class="form-group">
         <label>Number of Slot Per Time:</label>
+        <p v-if="errors.number_of_slots" class="error">{{ errors.number_of_slots }}</p>
         <input type="text" v-model="settings.number_of_slots" />
         <p class="item-description">
           Enter the maximum number of appointments allowed per time slot.
@@ -47,6 +48,7 @@
       </div>
       <div class="form-group">
         <label>Slot Durations:</label>
+        <p v-if="errors.slot_duration" class="error">{{ errors.slot_duration }}</p>
         <input type="text" v-model="settings.slot_duration" placeholder="Mins."/>
         <p class="item-description">
           Specify the duration (in minutes) for each time slot interval.
@@ -73,6 +75,7 @@
 
       <div class="form-group">
         <label>Time Zone:</label>
+        <p v-if="errors.time_zone" class="error">{{ errors.time_zone }}</p>
         <multiselect
           v-model="settings.time_zone"
           :options="timeZones"
@@ -87,7 +90,33 @@
       </div>
 
       <div class="form-group">
+        <label>Payment Methods:</label>
+        <p v-if="errors.payment_methods" class="error">{{ errors.payment_methods }}</p>
+          <!-- Multiselect outside the loop -->
+          <multiselect
+            v-model="selectedMethods[currentIndex]"
+            :options="payment_methods"
+            :custom-label="paymentLabel"
+            :taggable="true"
+            :multiple="true"
+            @tag="addOption"
+            @remove="onRemoveOption"
+            tag-placeholder="Add this as a new option"
+            placeholder="Select or add"
+            :close-on-select="false"
+            label="name"
+            track-by="name"
+          />
+     
+
+        <p class="item-description">
+          Add accepted payment methods. Customers will see these options during checkout.
+        </p>
+      </div>
+
+      <div class="form-group">
         <label>Currency:</label>
+        <p v-if="errors.currency_code" class="error">{{ errors.currency_code }}</p>
         <multiselect
           v-model="settings.currency_code"
           :options="currencyList"
@@ -204,7 +233,14 @@ export default {
         enable_tax_type:'',
         allow_last_minute_booking:'',
         allow_last_minute_buffer:'',
+        selectedPayment: null,
+        selectedOptions: [],
+        payment_methods: [],
       },
+      payment_methods: [],
+      paymentOptions: [],
+      selectedMethods: [[]],
+      currentIndex: 0,
       IMG_URL: '',
       timeZones: [],
       currencyList: [],
@@ -221,7 +257,14 @@ export default {
       loader_save: false,
       enable_discount_opt: false,
       enable_tax_opt: false,
-      enable_last_booking_opt:false
+      enable_last_booking_opt:false,
+      errors: {
+        number_of_slots: '',
+        slot_duration: '',
+        time_zone: '',
+        payment_methods: '',
+        currency_code: ''
+      }
     };
   },
   computed:{
@@ -264,16 +307,71 @@ export default {
           this.enable_tax_opt = !!Number(data.enable_tax);
           this.enable_last_booking_opt = !!Number(data.allow_last_minute_booking);
           this.settings = response.data;
+
+          this.paymentOptions = JSON.parse(data.selectedOptions);
+          this.selectedMethods[0] = JSON.parse(data.selectedOptions);
+          
+          this.payment_methods = JSON.parse(data.selectedOptions);
+          this.selected_payment = data.payment_method;
+          
         });
     },
     updateSettings() {
+
+
+      this.errors = {
+    number_of_slots: '',
+    slot_duration: '',
+    time_zone: '',
+    payment_methods: '',
+    currency_code: ''
+  };
+
+  let valid = true;
+
+  if (!this.settings.number_of_slots) {
+    this.errors.number_of_slots = 'Number of Slot Per Time is required.';
+    valid = false;
+  }
+
+  if (!this.settings.slot_duration) {
+    this.errors.slot_duration = 'Slot Duration is required.';
+    valid = false;
+  }
+
+  if (!this.settings.time_zone) {
+    this.errors.time_zone = 'Time Zone is required.';
+    valid = false;
+  }
+
+  if (!this.selectedMethods[this.currentIndex] || this.selectedMethods[this.currentIndex].length === 0) {
+    this.errors.payment_methods = 'At least one payment method is required.';
+    valid = false;
+  }
+
+  if (!this.settings.currency_code) {
+    this.errors.currency_code = 'Currency is required.';
+    valid = false;
+  }
+
+  if (!valid) {
+    this.notifyVue("top", "center", "danger", "Please fix the validation errors.", "ti-alert");
+    return;
+  }
+
+
+
       this.loader_save = true;
       let self = this;
+      
+      this.settings.selectedOptions = this.payment_methods;
+
       const payload = { 
         ...this.settings,
         business_id: self.user.business_id,
         user_id: self.user.id
       };
+
       axios
         .post(api.API_URL + "/settings", payload, {
           headers: { Authorization: `Bearer ${this.token}` }
@@ -326,6 +424,7 @@ export default {
     updateBusinessProfile() {
       let self = this;
       this.loader_save = true;
+
       // Use FormData to handle file uploads along with other fields
       const formData = new FormData();
       formData.append('business_name', this.businessProfile.business_name);
@@ -390,6 +489,9 @@ export default {
     timeZonesLabel(time) {
       return `${time}`;
     },
+    paymentLabel(option) {
+      return option.name;
+    },
     currencyLabel(currency) {
       return `${currency.code} (${currency.symbol})`;
     },
@@ -406,7 +508,35 @@ export default {
     enable_last_booking(value){
       this.enable_last_booking_opt = value;
     },
-  }
+    addPaymentMethod() {
+      this.payment_methods.push('');
+    },
+    onRemoveOption(removedOption) {
+      // Optional: if you want to also remove from the options list
+      const index = this.payment_methods.findIndex(item => item.name === removedOption.name);
+      if (index !== -1) {
+        this.payment_methods.splice(index, 1);
+      }
+
+      // Remove from all selectedMethods
+      this.selectedMethods = this.selectedMethods.map(selected =>
+        selected.filter(item => item.name !== removedOption.name)
+      );
+    },
+    addOption(newTag) {
+      const newOption = { name: newTag };
+      this.payment_methods.push(newOption);
+      // Optionally, you can automatically select the newly added tag:
+      this.selectedMethods[this.currentIndex].push(newOption);
+    },
+    editPaymentMethod(index) {
+      this.currentIndex = index;
+    },
+    customCreateTag (newTag) {
+          return { label: newTag, value: newTag }
+    },
+ }
+  
 };
 </script>
 
@@ -516,6 +646,46 @@ button:hover {
 
 .timezome-list{
   width: 35%;
+}
+
+.payment-method-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.payment-method-item .multiselect {
+  width: 200px;
+}
+
+.remove-button {
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-button {
+  background: #106c9c;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.add-button i {
+  margin-right: 5px;
+}
+
+.error {
+  color: red;
+  font-size: 0.85em;
+  margin-top: 4px;
 }
 
 /* Fade In Animation */

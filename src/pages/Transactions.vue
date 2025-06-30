@@ -19,7 +19,7 @@
                 class="client-search"
               >
             </multiselect>
-              <date-picker v-model="date_range" placeholder="Select date range" range></date-picker>
+              <date-picker v-model="date_range" placeholder="Select date range" range v-show="user.permissions.includes('filter_transactions')"></date-picker>
               <p-button type="info" round @click.native.prevent="generate" id="generate">
                 Filter
               </p-button>
@@ -35,7 +35,7 @@
 
 
           <h4 v-if="this.from_value == ''" class="report-text-head">Sales</h4>
-          <h4 v-else class="report-text-head">Reports: From {{ this.from_value  }} to {{this.to_value}}</h4>
+          <h4 v-else class="report-text-head">Reports: <span>From</span> {{ this.from_value  }} <span>to</span> {{this.to_value}}</h4>
 
           <loader v-if="loader"/>
           <table class="table table-striped" id="transact-tbl">
@@ -43,7 +43,7 @@
       <th style="text-align: center;">Date<span class="hide-desktop"> Time</span></th>
       <th class="hide-to-mobile">Time</th>
       <th><span class="hide-to-mobile">Full Name</span></th>
-      <th class="hide-to-mobile">Services</th>
+      <th class="hide-to-mobile">Services</th>  
       <th class="hide-to-mobile">Status</th>
       <th class="hide-to-mobile">Payment</th>
       <th class="hide-to-mobile">Total</th>
@@ -53,10 +53,10 @@
                                     <tr v-for="(transact,index) in transactions.data" :key="index">
                                         <td style="text-align: center;">{{ transact.date }}<span class="hide-desktop">{{ formatTime(transact.time) }}</span></td>
                                         <td class="hide-to-mobile">{{ formatTime(transact.time) }}</td>
-                                        <td>{{ transact.client ? transact.client.first_name : 'No client' }}<span class="hide-desktop"><b>Services:</b> {{ formatServices(transact) }}</span><span class="hide-desktop"><b>Status:</b> {{ transact.status }}</span><span class="hide-desktop"><b>Payment:</b> {{ transact.payment_method == '' || transact.status =='Unpaid' ? 'Pending \n to Update' : transact.payment_method}}</span><br/><span class="hide-desktop"><b>Total:</b> {{currency_label}}{{ Number(transact.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span></td>
+                                        <td>{{ transact.client ? transact.client.first_name : 'No client' }}<span class="hide-desktop"><b>Services:</b> {{ formatServices(transact) }}</span><span class="hide-desktop"><b>Status:</b> {{ transact.status }}</span><span class="hide-desktop"><b>Payment:</b> {{ getPaymentMethodName(transact) == '' || transact.status =='Unpaid' ? 'Pending \n to Update' : getPaymentMethodName(transact)}}</span><br/><span class="hide-desktop"><b>Total:</b> {{currency_label}}{{ Number(transact.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span></td>
                                         <td class="hide-to-mobile">{{ formatServices(transact) }}</td>
                                         <td class="hide-to-mobile">{{ transact.status }}</td>
-                                        <td class="hide-to-mobile">{{ transact.payment_method == '' || transact.status =='Unpaid' ? 'Pending \n to Update' : transact.payment_method}}</td>
+                                        <td class="hide-to-mobile">{{ getPaymentMethodName(transact) == '' || transact.status =='Unpaid' ? 'Pending \n to Update' : getPaymentMethodName(transact)}}</td>
                                         <td class="hide-to-mobile">{{currency_label}} {{ Number(transact.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</td>
                                         <td class="action">
                                               <p-button type="info" round @click.native.prevent="modalEditTransact(transact)">
@@ -105,7 +105,9 @@
 
   <Modal :showModal="modalVisible" :title="modal_title" @close="closeModalTransact">
       <loader v-if="loader_save"/> 
-      <multiselect
+      <div class="form-group">
+        <label class="control-label">Select Client: </label>
+        <multiselect
           v-model="selectedClient"
           :options="ClientItems"
           :custom-label="clientLabel"
@@ -115,6 +117,9 @@
           track-by="id"
           label="first_name"
         ></multiselect>
+        <!---->
+      </div>
+      
       <fg-input
               type="date"
               label="Date:"
@@ -129,7 +134,7 @@
        />  
        <div class="w-full mt-4 p-10">
         <div v-for="(service, index) in services" :key="index">
-          <div class="flex justify-start ml-2 mt-4">
+          <div class="flex justify-start">
             <multiselect
               v-model="service.selectedService"
               :options="service.serviceOptions"
@@ -160,32 +165,53 @@
         </div>
         
        <div style="clear:both; height: 30px;"></div>
-        <p>
-        <label>Status:</label><br/>
-        <select v-model="info.status">
+       <div class="form-group">
+        <label>Status:</label>
+        <select v-model="info.status" class="form-control">
             <option value="Fully Paid">Paid</option>
             <option value="Unpaid">Unpaid</option>
             <option value="Partial">Partial</option>
         </select>
-       </p>
+      </div>
         <p>
           <label>Client Notes:</label><br/>
           <textarea v-model="info.notes" id="client-notes">
           </textarea>
          </p>
+
+
+         <div class="form-group">
+        <label class="control-label">Handled By: </label>
+          <multiselect
+            v-model="selectedStaff"
+            :options="StaffItems"
+            :custom-label="staffLabel"
+            :loading="isLoadingStaff"
+            placeholder="Search Staff"
+            @search-change="fetchStaff"
+            track-by="id"
+            label="first_name"
+          ></multiselect>
+          <!---->
+      </div>
+
+         
+
         <fg-input
               type="hidden"
               label=""
               placeholder="Total"
               v-model="info.total"
        />   
-        
-       <div id="payment-method">
-            <label class="cash-label">Payment Method: </label> 
-            <select v-model="info.payment_method" class="payment-method">
-              <option value="Cash">Cash</option>
-              <option value="Gcash">Gcash</option>
-              <option value="Bank">Bank Transfer</option>
+       <div class="form-group">
+            <label>Payment Method: </label> 
+            <select v-model="info.payment_method" class="form-control">
+              <option 
+                v-for="(option, index) in dynamicOptions" 
+                :key="option.name" 
+                :value="JSON.stringify(option)">
+                {{ option.name }}
+              </option>
             </select>
       </div>
 
@@ -288,7 +314,8 @@ export default {
           notes:'',
           change: 0,
           tax:0,
-          discount:0
+          discount:0,
+          payment_method: ''
       },
       modal_title:'',
       modal_button:'',
@@ -315,12 +342,15 @@ export default {
       item: {},
       items: [],
       ClientItems: [],
+      StaffItems: [],
       template: ItemTemplate,
       input_name:'',
       role_id: '',
       selectedClient:'',
       selectedClientSearch: '',
+      selectedStaff:'',
       isLoadingClients:false,
+      isLoadingStaff:false,
       input_name: '',
       currency_label: '',
       total: 0,
@@ -329,7 +359,11 @@ export default {
       enable_tax: false,
       enable_discount_type: '',
       enable_tax_type: '',
-      discounted: 0
+      discounted: 0,
+      date_range: [
+        new Date(),  // Today's date
+        new Date()    // Today's date
+      ],
     }
   },
   computed:{
@@ -342,7 +376,23 @@ export default {
     settings() {
       // Ensure it's an array
       return this.$store.state.settings;
-    }
+    },
+    dynamicOptions() {
+      // Handle undefined settings
+      const plainSettings = this.settings || {};
+      
+      // Safely parse selectedOptions with fallback
+      const selectedOptions = plainSettings.selectedOptions 
+        ? JSON.parse(plainSettings.selectedOptions)
+        : [];
+
+      // Ensure array structure and transform items
+      return Array.isArray(selectedOptions) 
+        ? selectedOptions.map(item => ({
+            name: typeof item === 'string' ? item : item?.name || 'Unknown'
+          }))
+        : [];
+    }  
   },
   methods:{
     async list(page = 1) {
@@ -365,21 +415,15 @@ export default {
             this.from_value = null
             this.to_value = null
           }else{
-            const startDate = new Date(this.date_range[0]);
-            const endDate = new Date(this.date_range[1]);
+            // In the list() method, replace the date formatting with:
+              const startDate = new Date(this.date_range[0]);
+              const endDate = new Date(this.date_range[1]);
 
-            // Now use toLocaleDateString on the Date objects
-            this.from_value = startDate.toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-            });
-            this.to_value = endDate.toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-            });
-            url += `&from=${this.from_value}&to=${this.to_value}`;
+              // Format as MM/DD/YYYY
+              this.from_value = `${String(startDate.getMonth() + 1).padStart(2, '0')}/${String(startDate.getDate()).padStart(2, '0')}/${startDate.getFullYear()}`;
+              this.to_value = `${String(endDate.getMonth() + 1).padStart(2, '0')}/${String(endDate.getDate()).padStart(2, '0')}/${endDate.getFullYear()}`;
+
+              url += `&from=${this.from_value}&to=${this.to_value}`;
           }
           
         }
@@ -458,6 +502,7 @@ export default {
                     cash: self.info.cash,
                     discount: self.info.discount,
                     tax: self.info.tax,
+                    staff: self.selectedStaff.id,
                     services: self.services
                     .filter(service => service.selectedService)  // only include items with a selection
                     .map(service => service.selectedService)
@@ -491,8 +536,19 @@ export default {
                         self.info.notes = ''
                         self.info.status = ''
                         self.info.total = ''
-                        self.services = []
                         self.selectedClient = '' 
+                        // Reset services to initial state with one default entry
+                        this.services = [{
+                          services_name: "",
+                          price: "",
+                          selectedService: null,
+                          serviceOptions: [],
+                          loading: false,
+                        }];
+                        
+                        // Fetch initial service options for the first service (index 0)
+                        this.fetchServiceOptions('', 0);
+
                       }
                       
                       self.add_btn = true; 
@@ -535,6 +591,7 @@ export default {
                     cash: self.info.cash,
                     discount: self.info.discount,
                     tax: self.info.tax,
+                    staff: self.selectedStaff ? self.selectedStaff.id : null,
                     services: self.services
                     .filter(service => service.selectedService)  // only include items with a selection
                     .map(service => service.selectedService)
@@ -584,12 +641,19 @@ export default {
       });
     },
     generate() {
-    // Ensure a valid date range exists.
-    if (!this.date_range || this.date_range.length < 2) {
-      const today = new Date();
-      this.date_range = [today, today];
-    }
-    this.list();
+      if (!this.date_range || this.date_range.length < 2) {
+        const today = new Date();
+        this.date_range = [today, today];
+      }
+      
+      // Format dates consistently as MM/DD/YYYY
+      const startDate = new Date(this.date_range[0]);
+      const endDate = new Date(this.date_range[1]);
+      
+      this.from_value = `${String(startDate.getMonth() + 1).padStart(2, '0')}/${String(startDate.getDate()).padStart(2, '0')}/${startDate.getFullYear()}`;
+      this.to_value = `${String(endDate.getMonth() + 1).padStart(2, '0')}/${String(endDate.getDate()).padStart(2, '0')}/${endDate.getFullYear()}`;
+
+      this.list();
   },
 
     modalAddTransact(){
@@ -607,6 +671,16 @@ export default {
       this.topay = false;
       this.input_name = ''
       this.info.change = 0
+      this.services = [{
+                          services_name: "",
+                          price: "",
+                          selectedService: null,
+                          serviceOptions: [],
+                          loading: false,
+                        }];
+                        
+                        // Fetch initial service options for the first service (index 0)
+                        this.fetchServiceOptions('', 0);
     },
     deleteTransact(id){
       this.loader_save = true;
@@ -762,7 +836,7 @@ export default {
 
                 }).catch(({ response })=>{
                       if(response.data.error.code =='token_could_not_verified'){
-                          this.$router.push('/login')
+                          window.location.href = '/login';
                       }
                 })
     },
@@ -778,9 +852,11 @@ export default {
       this.info.total = transact.total;
       this.info.payment_method = transact.payment_method;
       this.info.client_id = transact.client_id;
-      
       // Auto-populate the client multiselect
       this.selectedClient = transact.client ? transact.client : null;
+      this.selectedStaff = transact.handled_by 
+    ? transact.handled_by 
+    : { id: null, first_name: 'N/A', last_name: '' };
       
       this.info.id = transact.id;
       // Ensure the services are populated (assuming transact.services is a JSON string)
@@ -813,8 +889,32 @@ export default {
           this.isLoadingClients = false;
         });
     },
+    fetchStaff(searchText) {
+      this.isLoadingStaff = true;
+      axios
+        .get(api.API_URL + `/get-staff?search=${searchText}&business_id=${this.user.business_id}`, {
+          headers: { Authorization: `Bearer ${this.token}` }
+        })
+        .then(({ data }) => {
+          const defaultItem = {
+          id: null,
+          first_name: 'N/A',
+          last_name: '', // or 'N/A'
+          email: '',     // add other fields used in your template
+        };
+          this.StaffItems = [defaultItem, ...data.data];
+          this.isLoadingStaff = false;
+        })
+        .catch((error) => {
+          console.error("Error fetching Staffs:", error);
+          this.isLoadingStaff = false;
+        });
+    },
     clientLabel(client) {
       return `${client.first_name} ${client.last_name}`;
+    },
+    staffLabel(staff) {
+      return `${staff.first_name} ${staff.last_name}`;
     },
     servicesLabel(service) {
        return service ? service.name : '';
@@ -988,8 +1088,44 @@ export default {
         // Implement your error display logic
         console.error(message);
         alert(message);
-      }
+      },
+      getPaymentMethodName(transact) {
+        if (transact.status === 'Unpaid' || !transact.payment_method) {
+          return 'Pending to Update';
+        }
 
+        let method = transact.payment_method;
+
+        // If it's a string, try to parse it
+        if (typeof method === 'string') {
+          try {
+            method = JSON.parse(method);
+          } catch (e) {
+            return method; // fallback to raw string if parsing fails
+          }
+        }
+
+        return method.name || 'Unknown';
+      },
+      generate() {
+      // Format dates consistently
+      const startDate = this.date_range[0] || new Date();
+      const endDate = this.date_range[1] || new Date();
+      
+      // Format dates as YYYY-MM-DD
+      this.from_value = startDate.toISOString().split('T')[0];
+      this.to_value = endDate.toISOString().split('T')[0];
+      
+      this.list();
+    }
+
+  },
+  paymentMethodParsed() {
+    try {
+      return JSON.parse(this.transact.payment_method);
+    } catch (e) {
+      return {};
+    }
   },
   created() {
       this.list();
@@ -997,13 +1133,15 @@ export default {
       this.info.client_id = this.$route.params.id;
       this.role_id = localStorage.getItem('role_id');
       this.fetchClients('');
+      this.fetchStaff('');
       this.fetchServiceOptions('',0);
       const plainSettings = JSON.parse(JSON.stringify(this.settings));
       this.currency_label = plainSettings.currency_symbol;
       this.enable_discount = !!Number(plainSettings.enable_discount);
       this.enable_tax = !!Number(plainSettings.enable_tax);
       this.enable_discount_type = plainSettings.enable_discount_type;
-      this.enable_tax_type = plainSettings.enable_tax_type
+      this.enable_tax_type = plainSettings.enable_tax_type;
+      this.generate();
   }
 };
 </script>
@@ -1041,9 +1179,11 @@ export default {
 #cancel{float: right; margin-right:5px;}
 .small-info{display: block; margin-bottom: 20px;}
 .cur_label{font-weight: bold;}
+.multiselect__placeholder{color: #707070!important;}
 
 @media (max-width: 768px) {
   .filter-gen{flex: none!important;  max-width: 100%!important;}
+  .filter-gen #generate{width: 25%!important;}
   .client-search{width: 100%; margin-bottom: 8px;}
   #page-transactions #top-tool-bar{text-align: center;}
   .mbl{margin-top:20px; flex: none!important;  max-width: 100%!important;}

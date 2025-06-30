@@ -161,7 +161,7 @@ export default {
             _context.t0.response.data && 
             _context.t0.response.data.error && 
             _context.t0.response.data.error.code === 'token_could_not_verified') {
-          this.$router.push('/login');
+          window.location.href = '/login';
         }
         self.loader = false;
       }

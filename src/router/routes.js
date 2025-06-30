@@ -32,6 +32,7 @@ import UpdateBusiness from "@/layout/dashboard/UpdateBusiness.vue";
 
 
 import AppointmentLayout from "@/layout/dashboard/AppointmentLayout.vue";
+import LandingLayout from "@/layout/dashboard/LandingPageLayout.vue";
 import RegisterLayout from "@/layout/dashboard/RegisterLayout.vue";
 import ForgotLayout from "@/layout/dashboard/ForgotLayout.vue";
 import ResetLayout from "@/layout/dashboard/ResetLayout.vue";
@@ -205,6 +206,12 @@ const routes = [
     name: "appointment",
     props: true, // optional, allows passing the route param as a prop
   },  
+  {
+    path: "/business/:id",
+    component: LandingLayout,
+    name: "business",
+    props: true, // optional, allows passing the route param as a prop
+  },
   {
     path: "/register",
     component: RegisterLayout,

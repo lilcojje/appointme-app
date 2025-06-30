@@ -31,6 +31,7 @@
                 <p-button type="info" round @click.native.prevent="modalAddAppointment" id="add-appointment" v-show="user.permissions.includes('add_appointments')">
                   Add Appointment
                 </p-button>
+                <p-button type="info" round @click.native.prevent="exportToExcel" id="export-apt" v-show="user.permissions.includes('export_appointments')">Export</p-button>
               </div>
             </div>
             <div class="row" id="top-tool-bar">
@@ -91,7 +92,7 @@
               </tbody>
               <tbody v-else>
                 <tr>
-                  <td align="center" colspan="7" id="no-record">No record found.</td>
+                  <td align="center" colspan="9" id="no-record">No record found.</td>
                 </tr>
               </tbody>
             </table>
@@ -441,7 +442,7 @@ export default {
         .catch(({ response }) => {
           if (response.data.error.code === "token_could_not_verified") {
             localStorage.removeItem("token");
-            this.$router.push("/login");
+            window.location.href = '/login';
           }
         });
     },
@@ -858,7 +859,7 @@ export default {
         })
         .catch(({ response }) => {
           if (response.data.error.code == "token_could_not_verified") {
-            this.$router.push("/login");
+            window.location.href = '/login';
           }
         });
     },
@@ -1067,7 +1068,7 @@ export default {
             error.response.data.error &&
             error.response.data.error.code === "token_could_not_verified"
           ) {
-            this.$router.push("/login");
+            window.location.href = '/login';
           } else {
             console.error(error);
           }
@@ -1205,7 +1206,7 @@ export default {
                 //self.dateChanged = false;
 
                 if (response.data.error.code === "token_could_not_verified") {
-                  this.$router.push("/login");
+                  window.location.href = '/login';
                 }
               } else {
                 errorMessage = "Unknown error occurred.";
@@ -1236,7 +1237,72 @@ export default {
         this.info.date = "";
         this.info.time = "";
         this.services = [];
-      }
+      },
+      async exportToExcel() {
+        this.loader_save = true;
+        try {
+          const params = {
+            business_id: this.user.business_id,
+          };
+
+          // Add client filter if selected
+          if (this.selectedClientSearch && this.selectedClientSearch.id) {
+            params.client_id = this.selectedClientSearch.id;
+          }
+
+          // Add date filters if date_range is selected
+          if (this.date_range && this.date_range.length >= 2) {
+            const startDate = new Date(this.date_range[0]);
+            const endDate = new Date(this.date_range[1]);
+
+            params.from = startDate.toLocaleDateString("en-US", {
+              month: "2-digit",
+              day: "2-digit",
+              year: "numeric"
+            });
+            params.to = endDate.toLocaleDateString("en-US", {
+              month: "2-digit",
+              day: "2-digit",
+              year: "numeric"
+            });
+          }
+
+          const response = await axios.get(api.API_URL + '/appointment/export', {
+            params: params,
+            responseType: 'blob',
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          // Create download link
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'appointments.xlsx');
+          document.body.appendChild(link);
+          link.click();
+          
+          // Cleanup
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+          if (error.response && error.response.data instanceof Blob) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const errorData = JSON.parse(reader.result);
+              this.showError(errorData.message || 'Export failed');
+            };
+            reader.readAsText(error.response.data);
+          } else {
+            this.showError('Failed to export transactions');
+          }
+        } finally {
+          this.loader_save = false;
+        }
+      },
   },
   created() {
     this.select_view = 'list';
@@ -1402,4 +1468,5 @@ a.fc-event {
 .status{display: inline-block;}
 .search-client{margin-bottom: 20px;}
 .hide-desktop{display: none;}
+#export-apt{float: right; margin-right: 5px; margin-left: 5px;}
 </style>

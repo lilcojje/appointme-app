@@ -155,4 +155,5 @@ export default {
 .wrapper .sidebar .logo .simple-text .logo-img img {
   max-width: 40px!important;
 }
+.logo{white-space: nowrap;}
 </style>

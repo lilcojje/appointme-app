@@ -196,7 +196,7 @@ export default {
         self.total_page = Math.ceil(data.total / limit);
       }).catch(({ response }) => {
         if (response.data.error.code === 'token_could_not_verified') {
-          this.$router.push('/login')
+          window.location.href = '/login';
         }
       });
     },

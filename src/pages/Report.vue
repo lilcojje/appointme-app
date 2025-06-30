@@ -25,17 +25,19 @@
               <date-picker v-model="startDate" placeholder="Start Date" :clearable="true" />
               <date-picker v-model="endDate" placeholder="End Date" :clearable="true" />
               <button round @click="generateReport">Generate Report</button>
+              <button @click="downloadPdf" class="download-btn" v-show="user.permissions.includes('download_report')">Download PDF</button>
             </div>
 
             <!-- Filter for Daily Appointment Schedule -->
             <div v-else-if="reportType === 'Daily Appointment Schedule'" class="filter-group">
               <date-picker v-model="specificDate" placeholder="Select Date" :clearable="true" />
               <button round @click="generateReport">Generate Report</button>
+              <button @click="downloadPdf" class="download-btn" v-show="user.permissions.includes('download_report')">Download PDF</button>
             </div>
 
             <!-- Filter for Sales Report -->
             <div v-else-if="reportType === 'Sales Report'" class="filter-group">
-              <select v-model="salesRange" id="sales_range">
+              <select v-model="salesRange" id="sales_range" @change="resetSales">
                 <option disabled value="">Select Sales Range</option>
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
@@ -43,11 +45,13 @@
                 <option value="yearly">Yearly</option>
               </select>
               <button round @click="generateReport">Generate Report</button>
+              <button @click="downloadPdf" class="download-btn" v-show="user.permissions.includes('download_report')">Download PDF</button>
             </div>
 
             <!-- For other reports, just a Generate button -->
             <div v-else-if="reportType" class="filter-group">
               <button round @click="generateReport">Generate Report</button>
+              <button @click="downloadPdf" class="download-btn" v-show="user.permissions.includes('download_report')">Download PDF</button>
             </div>
 
             <!-- Loader -->
@@ -192,8 +196,8 @@
 
               <!-- Sales Report -->
               <div v-if="reportType === 'Sales Report'">
-                <h5>Sales Report - {{ reportData.range | capitalize }} Sales</h5>
-                <table class="table table-striped tbl-style">
+                <h5 v-show="hideSalesTbl">Sales Report - {{ reportData.range | capitalize }} Sales</h5>
+                <table class="table table-striped tbl-style" v-show="hideSalesTbl">
                   <thead>
                     <tr>
                       <th v-if="salesRange === 'daily'">Date</th>
@@ -252,6 +256,7 @@ export default {
       specificDate: null, // For Daily Appointment Schedule
       salesRange: "",    // For Sales Report (daily, weekly, monthly, yearly)
       reportData: null,  // Data returned from the API
+      hideSalesTbl: false
     };
   },
   computed: {
@@ -267,6 +272,9 @@ export default {
     },
   },
   methods: {
+    resetSales(){
+      this.hideSalesTbl = false;
+    },
     resetFilters() {
       // Reset any previously set filter values when changing report type
       this.startDate = null;
@@ -309,6 +317,7 @@ export default {
         if (this.specificDate) params.date = this.specificDate;
       }
       if (this.reportType === "Sales Report") {
+        this.hideSalesTbl = true;
         if (!this.salesRange) {
           Swal.fire("Please select a sales range");
           this.loader = false;
@@ -332,12 +341,61 @@ export default {
     },
     formatCurrency(value) {
       if (!value) return "₱0.00"; // Default value if it's null/undefined
+
+      const currencyCode = this.settings.currency_code || "PHP"; // fallback to PHP
+
       return new Intl.NumberFormat("en-US", {
         style: "currency",
-        currency: this.settings.currency_code, // Change to your desired currency (e.g., USD, EUR)
-        minimumFractionDigits: 2, // Ensures two decimal places
+        currency: currencyCode,
+        minimumFractionDigits: 2,
       }).format(value);
     },
+
+    async downloadPdf() {
+        this.loader = true;
+        const params = {
+          business_id: this.business_id,
+          report_type: this.reportType,
+        };
+
+        if (this.reportType === "Appointment Summary Report") {
+          if (this.startDate) params.start_date = this.startDate;
+          if (this.endDate) params.end_date = this.endDate;
+        }
+
+        if (this.reportType === "Daily Appointment Schedule") {
+          if (this.specificDate) params.date = this.specificDate;
+        }
+
+        if (this.reportType === "Sales Report") {
+          params.range = this.salesRange;
+        }
+
+        try {
+          const response = await axios.get(`${api.API_URL}/report/download`, {
+            params: params,
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+            responseType: 'blob', // <-- Required to handle binary file
+          });
+
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", "report.pdf"); // Optional: make filename dynamic
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+
+          this.loader = false;
+        } catch (error) {
+          console.error("PDF download failed", error);
+        }
+      }
+
+
   },
   created() {
     // Initialize business_id from localStorage (or from props)

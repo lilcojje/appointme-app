@@ -252,8 +252,8 @@ export default {
         store.commit('enableOnlineBooking', response.data.user.settings.enable_booking);
 
         this.loader = false;
-        //this.updateSuccess = true;
-        this.$router.push('/subscription');
+        this.updateSuccess = true;
+        //this.$router.push('/subscription');
       }).catch(error => {
         this.loader = false;
         if (error.response && error.response.data) {

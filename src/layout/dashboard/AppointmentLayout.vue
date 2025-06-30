@@ -412,7 +412,10 @@ export default {
       axios
         .post(
           api.API_URL + `/client-email`,
-          { email: email },
+          { 
+          email: email,
+          business_id: this.$route.params.id
+          },
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`

@@ -85,7 +85,7 @@
             name: "Free",
             value: "free",
             description:
-              "Limited features: Add up to 50 clients, 15 services, 30 appointments, 50 transactions, and 1 user only."
+              "Limited features: Add up to 500 Clients, 50 Services, 500 Appointments, 500 Sales Transactions, and 1 User only."
           },
           {
             name: "Monthly",

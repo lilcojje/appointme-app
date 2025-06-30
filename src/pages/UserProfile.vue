@@ -156,7 +156,7 @@ export default {
         .catch(error => {
           this.loader = false;
           if (error.response && error.response.data.error.code === "token_could_not_verified") {
-            this.$router.push("/login");
+            window.location.href = '/login';
           }
         });
     },

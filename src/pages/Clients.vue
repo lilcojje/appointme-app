@@ -188,7 +188,7 @@ export default {
         self.total = data.total;
       }).catch(({ response })=>{
         if(response.data.error.code =='token_could_not_verified'){
-          this.$router.push('/login')
+          window.location.href = '/login';
         }
       })
     },
@@ -403,7 +403,7 @@ export default {
         self.items = data.data
       }).catch(({ response })=>{
         if(response.data.error.code =='token_could_not_verified'){
-          this.$router.push('/login')
+          window.location.href = '/login';
         }
       })
     },
@@ -556,6 +556,8 @@ export default {
   margin-right: 10px;
   background-color: #106c9c;
   border-color: #106c9c;
+  width: 116px;
+  margin-left:5px;
 }
 
 #no-record {
@@ -608,5 +610,6 @@ table.tbl-style tbody tr:hover {
 table.tbl-style td {
   padding: 15px;
 }
+
 
 </style>
